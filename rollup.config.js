@@ -4,9 +4,9 @@ import typescript from '@rollup/plugin-typescript';
 import { terser } from 'rollup-plugin-terser'
 
 export default {
-  input: './src/svelte-drag-and-drop-action.ts',
+  input: './src/svelte-drag-and-drop-actions.ts',
   output: {
-    file:     './dist/svelte-drag-and-drop-action.esm.js',
+    file:     './dist/svelte-drag-and-drop-actions.esm.js',
     format:   'esm',
     sourcemap:true
   },
