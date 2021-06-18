@@ -1,0 +1,34 @@
+{
+  "name": "svelte-drag-and-drop-actions",
+  "version": "0.1.0",
+  "description": "HTML5 Drag-and-Drop implemented as Svelte actions",
+  "module": "./dist/svelte-drag-and-drop-actions.esm.js",
+  "exports": {
+    "import": "./dist/svelte-drag-and-drop-actions.esm.js"
+  },
+  "scripts": {
+    "build": "rimraf dist && tsc && rollup -c rollup.config.js && mv src/*.d.ts dist && rm src/*.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rozek/svelte-drag-and-drop-actions.git"
+  },
+  "keywords": [
+    "svlte3",
+    "svelte-action",
+    "html5-drag"
+  ],
+  "author": "Andreas Rozek <a.rozek@gmx.de> (https://www.rozek.de/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rozek/svelte-drag-and-drop-actions/issues"
+  },
+  "homepage": "https://github.com/rozek/svelte-drag-and-drop-actions#readme",
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^8.2.1",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.52.1",
+    "typescript": "^4.3.4"
+  }
+}
