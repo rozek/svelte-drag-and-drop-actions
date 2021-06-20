@@ -67,27 +67,9 @@ If this sounds too abstract, just have a look into the examples: many of them il
 TypeScript programmers may import the following types in order to benefit from static type checking:
 
 * `type Position = { x:number, y:number }`<br>a `Position` instance represents a single point in a linearly scaled cartesic coordinate system. It may be considered as the same coordinate system a browser uses when coordinates are measured in pixels (px) - with one important exception: the origin of this system can be chosen by the programmer. Thus, it is up to the programmer to decide whether coordinates delivered by `svelte-drag-and-drop-actions` should be relative to an element, the viewport or the document itself.
-* ```
-type PositionReference = (
-  'parent' | 'body' | HTMLElement | SVGElement // | MathMLElement
-)
-```<br>
-* ```
-type DragDummy = (
-  string | HTMLElement | SVGElement | // MathMLElement |
-  'standard' | 'clone' | 'none'
-)
-'''<br>
-* ```
-type DraggableOptions = {
-  Entity:any, relativeTo?:PositionReference,
-  Dummy?:DragDummy, DummyOffsetX?:number, DummyOffsetY?:number,
-  minX?:number, minY?:number, maxX?:number, maxY?:number,
-  onDragStart?:Position | (() => Position),
-  onDragMove?: (x:number,y:number, dx:number,dy:number) => void,
-  onDragEnd?:  (x:number,y:number, dx:number,dy:number) => void,
-}
-```<br>
+* `type PositionReference = (`<br>&nbsp; `'parent' | 'body' | HTMLElement | SVGElement // | MathMLElement`<br>`)`<br>
+* `type DragDummy = (`<br>`  string | HTMLElement | SVGElement |`<br>&nbsp; `'standard' | 'clone' | 'none'`<br>`)`<br>
+* `type DraggableOptions = {`<br>&nbsp; `Entity:any, relativeTo?:PositionReference,`<br>&nbsp; `Dummy?:DragDummy, DummyOffsetX?:number, DummyOffsetY?:number,`<br>&nbsp; `minX?:number, minY?:number, maxX?:number, maxY?:number,`<br>&nbsp; `onDragStart?:Position | (() => Position),`<br>&nbsp; `onDragMove?: (x:number,y:number, dx:number,dy:number) => void,`<br>&nbsp; `onDragEnd?:  (x:number,y:number, dx:number,dy:number) => void,`<br>`}`<br>
 
 ### use:asDraggable ###
 
