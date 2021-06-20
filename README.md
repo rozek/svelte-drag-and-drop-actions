@@ -60,6 +60,8 @@ Svelte is a Framework for building *reactive* applications, i.e. it assumes, tha
 
 Combined with a rather declarative API (designed with the most common use cases in mind), such an approach leads to a lightweight and easily usable module which still offers programmers full control over the actual side-effects of dragging (and dropping)
 
+If this sounds too abstract, just have a look into the examples: many of them illustrate specific use cases any may therefore serve as a basis for your own dvelopment.
+
 ### use:asDraggable ###
 
 (t.b.w.)
