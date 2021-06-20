@@ -64,6 +64,8 @@ If this sounds too abstract, just have a look into the examples: many of them il
 
 ### use:asDraggable ###
 
+`use:asDraggable` should be used for elements which will only be dragged around (but never dropped onto another element). Many use cases (from dragable windows over draggable nodes of graphical shapes to the resize handles found in may visual designers) only need this kind of behaviour.
+
 (t.b.w.)
 
 ### use:asDroppable ###
