@@ -66,6 +66,8 @@ If this sounds too abstract, just have a look into the examples: many of them il
 
 `use:asDraggable` should be used for elements which will only be dragged around (but never dropped onto another element). Many use cases (from dragable windows over draggable nodes of graphical shapes to the resize handles found in may visual designers) only need this kind of behaviour.
 
+The type annotiations shown below are relevant for TypeScript programmers only, JavaScript programmers may simply ignore them.
+
 (t.b.w.)
 
 `use:asDraggable` should never be combined with `use:asDroppable` (as the latter includes the former) - if you want an element to be dropped somewhere, simply use `use:asDroppable` alone.
@@ -76,6 +78,8 @@ If this sounds too abstract, just have a look into the examples: many of them il
 
 `use:asDroppable` is an extension of `use:asDraggable` and should be used for elements which will not only be dragged around but also dropped onto another element. Because of the underlying HTML5 drag-and-drop, dropping an element onto another one may lead to an exchange of data - but `svelte-drag-and-drop-actions` extends that functionality (for elements within the same application) and gives the programmer full control over what a "drop" will trigger without any need for nasty tricks (based on the keys of a DataTransfer object)
 
+The type annotiations shown below are relevant for TypeScript programmers only, JavaScript programmers may simply ignore them.
+
 (t.b.w.)
 
 `use:asDraggable` should never be combined with `use:asDroppable` (as the latter includes the former) - if you want an element to be dropped somewhere, simply use `use:asDroppable` alone.
@@ -85,6 +89,8 @@ If this sounds too abstract, just have a look into the examples: many of them il
 ### use:asDropZone ###
 
 `use:asDropZone` marks an element as a "drop zone" which allows "droppable" elements to be dropped onto it in order to trigger an operation. 
+
+The type annotiations shown below are relevant for TypeScript programmers only, JavaScript programmers may simply ignore them.
 
 (t.b.w.)
 
