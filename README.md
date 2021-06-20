@@ -62,6 +62,33 @@ Combined with a rather declarative API (designed with the most common use cases 
 
 If this sounds too abstract, just have a look into the examples: many of them illustrate specific use cases any may therefore serve as a basis for your own dvelopment.
 
+### Exported Types ###
+
+TypeScript programmers may import the following types in order to benefit from static type checking:
+
+* `type Position = { x:number, y:number }`<br>a `Position` instance represents a single point in a linearly scaled cartesic coordinate system. It may be considered as the same coordinate system a browser uses when coordinates are measured in pixels (px) - with one important exception: the origin of this system can be chosen by the programmer. Thus, it is up to the programmer to decide whether the coordinates delivered by `svelte-drag-and-drop-actions` should be relative to an element, the viewport or the document itself.
+* ```
+type PositionReference = (
+  'parent' | 'body' | HTMLElement | SVGElement // | MathMLElement
+)
+```<br>
+* ```
+type DragDummy = (
+  string | HTMLElement | SVGElement | // MathMLElement |
+  'standard' | 'clone' | 'none'
+)
+'''<br>
+* ```
+type DraggableOptions = {
+  Entity:any, relativeTo?:PositionReference,
+  Dummy?:DragDummy, DummyOffsetX?:number, DummyOffsetY?:number,
+  minX?:number, minY?:number, maxX?:number, maxY?:number,
+  onDragStart?:Position | (() => Position),
+  onDragMove?: (x:number,y:number, dx:number,dy:number) => void,
+  onDragEnd?:  (x:number,y:number, dx:number,dy:number) => void,
+}
+```<br>
+
 ### use:asDraggable ###
 
 `use:asDraggable` should be used for elements which will only be dragged around (but never dropped onto another element). Many use cases (from dragable windows over draggable nodes of graphical shapes to the resize handles found in may visual designers) only need this kind of behaviour.
