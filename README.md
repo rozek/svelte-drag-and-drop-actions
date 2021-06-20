@@ -68,14 +68,27 @@ If this sounds too abstract, just have a look into the examples: many of them il
 
 (t.b.w.)
 
+`use:asDraggable` should never be combined with `use:asDroppable` (as the latter includes the former) - if you want an element to be dropped somewhere, simply use `use:asDroppable` alone.
+
+`use:asDraggable` may, however, be combined with `use:asDropZone` in order to implement draggable drop zones.
+
 ### use:asDroppable ###
 
+`use:asDroppable` is an extension of `use:asDraggable` and should be used for elements which will not only be dragged around but also dropped onto another element. Because of the underlying HTML5 drag-and-drop, dropping an element onto another one may lead to an exchange of data - but `svelte-drag-and-drop-actions` extends that functionality (for elements within the same application) and gives the programmer full control over what a "drop" will trigger without any need for nasty tricks (based on the keys of a DataTransfer object)
+
 (t.b.w.)
+
+`use:asDraggable` should never be combined with `use:asDroppable` (as the latter includes the former) - if you want an element to be dropped somewhere, simply use `use:asDroppable` alone.
+
+`use:asDroppable` may, however, be combined with `use:asDropZone` in order to implement draggable drop zones which may itself be dropped over other drop zones.
 
 ### use:asDropZone ###
 
+`use:asDropZone` lets an element 
+
 (t.b.w.)
 
+`use:asDropZone` may be combined with either `use:asDraggable` or `use:asDroppable` (not both together) in order to implement draggable drop zones which may itself be dropped over other drop zones.
 
 ### Build Instructions ###
 
