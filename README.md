@@ -84,7 +84,7 @@ If this sounds too abstract, just have a look into the examples: many of them il
 
 ### use:asDropZone ###
 
-`use:asDropZone` lets an element 
+`use:asDropZone` marks an element as a "drop zone" which allows "droppable" elements to be dropped onto it in order to trigger an operation. 
 
 (t.b.w.)
 
