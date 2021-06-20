@@ -2,7 +2,7 @@
 
 a lightweight but flexible HTML5 Drag-and-Drop implemented as Svelte actions
 
-HTML5 Drag-and-Drop allows web applications to provide a visual user interface for transfering data between HTML elements or importing data from outside a browser. Using HTML5 Drag-and-Drop for *operating* an application (i.e. repositioning, resizing or reordering of elements) is difficult and suffers from some browser-specific bugs.
+HTML5 Drag-and-Drop allows web applications to provide a visual user interface for transfering data between HTML elements or exchanging data with a browser's environment. Using HTML5 Drag-and-Drop for *operating* an application (i.e. repositioning, resizing or reordering of elements) is difficult and suffers from some browser-specific bugs.
 
 Instead of fully re-implementing the latter (as done in [agnostic-draggable](https://github.com/rozek/agnostic-draggable)), `svelte-drag-and-drop-actions` simply builds upon already existing HTML5 Drag-and-Drop features and extends it towards the desired functionality. The result is a lightweight package with a surprisingly simple programming interface.
 
