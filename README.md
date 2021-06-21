@@ -18,7 +18,7 @@ npm install svelte-drag-and-drop-actions
 
 ### Usage Example ###
 
-The following example illustrates plain dragging of a "Draggable" within the bounds of a given "Arena". Read below to understand how it is working.
+The following example illustrates plain dragging of a "Draggable" within the bounds of a given "Arena". Read on to understand how it is working.
 
 ```
 <script>
