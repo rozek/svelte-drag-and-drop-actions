@@ -77,18 +77,6 @@ TypeScript programmers may import the following types in order to benefit from s
 
 The type annotiations shown below are relevant for TypeScript programmers only, JavaScript programmers may simply ignore them.
 
-(t.b.w.)
-
-`use:asDraggable` should never be combined with `use:asDroppable` (as the latter includes the former) - if you want an element to be dropped somewhere, simply use `use:asDroppable` alone.
-
-`use:asDraggable` may, however, be combined with `use:asDropZone` in order to implement draggable drop zones.
-
-### use:asDroppable ###
-
-`use:asDroppable` is an extension of `use:asDraggable` and should be used for elements which will not only be dragged around but also dropped onto another element. Because of the underlying HTML5 drag-and-drop, dropping an element onto another one may lead to an exchange of data - but `svelte-drag-and-drop-actions` extends that functionality (for elements within the same application) and gives the programmer full control over what a "drop" will trigger without any need for nasty tricks (based on the keys of a DataTransfer object)
-
-The type annotiations shown below are relevant for TypeScript programmers only, JavaScript programmers may simply ignore them.
-
 `use:asDraggable={options}`
 
 is the classical pattern for Svelte actions. `use:asDraggable` supports the following options (bundled into an instance of type `DraggableOptions`):
@@ -104,6 +92,18 @@ is the classical pattern for Svelte actions. `use:asDraggable` supports the foll
 * **`onDragStart?:Position | (() => Position)`**<br>`onDragStart` is either an optional `Position` (defaulting to `{x:0, y:0}`) or a parameter-less function returning such a `Position`. In either case, this parameter specifies the coordinate values from which to start dragging. **Important**: these "coordinates" do not necessarily represent a particular point on the screen - in fact, e.g., a resize handle may choose to start with the current width and height of the element to be resized and then directly use the results of any `onDragMove` or `onDragEnd` as the new element width and height without additional computation
 * **`onDragMove?: (x:number,y:number, dx:number,dy:number) => void`**<br>`onDragMove` is an optional callback which (if given) is called repeatedly during dragging. When invoked, it receives the current drag result (in `x` and `y`, with an initial value chosen by `onDragStart`) and  the offset between this and the previous invocation (in `dx` and `dy`)
 * **`onDragEnd?:  (x:number,y:number, dx:number,dy:number) => void`**<br>`onDragEnd` is is an optional callback which (if given) is called once when dragging has finished. When invoked, it receives the final drag result (in `x` and `y`, with the origin chosen by `onDragStart`) and the offset between this and the most recent invocation of `onDragMove` (in `dx` and `dy`)
+
+`use:asDraggable` should never be combined with `use:asDroppable` (as the latter includes the former) - if you want an element to be dropped somewhere, simply use `use:asDroppable` alone.
+
+`use:asDraggable` may, however, be combined with `use:asDropZone` in order to implement draggable drop zones.
+
+### use:asDroppable ###
+
+`use:asDroppable` is an extension of `use:asDraggable` and should be used for elements which will not only be dragged around but also dropped onto another element. Because of the underlying HTML5 drag-and-drop, dropping an element onto another one may lead to an exchange of data - but `svelte-drag-and-drop-actions` extends that functionality (for elements within the same application) and gives the programmer full control over what a "drop" will trigger without any need for nasty tricks (based on the keys of a DataTransfer object)
+
+The type annotiations shown below are relevant for TypeScript programmers only, JavaScript programmers may simply ignore them.
+
+(t.b.w.)
 
 `use:asDraggable` should never be combined with `use:asDroppable` (as the latter includes the former) - if you want an element to be dropped somewhere, simply use `use:asDroppable` alone.
 
