@@ -105,6 +105,12 @@ While being dragged, the CSS class `dragged` is assigned to the draggable elemen
 
 The type annotiations shown below are relevant for TypeScript programmers only, JavaScript programmers may simply ignore them.
 
+`use:asDroppable={options}`
+
+is the classical pattern for Svelte actions. `use:asDroppable` supports the following options (bundled into an instance of type `DroppableOptions`):
+
+* **``**<br>
+
 (t.b.w.)
 
 `use:asDraggable` should never be combined with `use:asDroppable` (as the latter includes the former) - if you want an element to be dropped somewhere, simply use `use:asDroppable` alone.
@@ -116,6 +122,12 @@ The type annotiations shown below are relevant for TypeScript programmers only, 
 `use:asDropZone` marks an element as a "drop zone" which allows "droppable" elements to be dropped onto it in order to trigger an operation. 
 
 The type annotiations shown below are relevant for TypeScript programmers only, JavaScript programmers may simply ignore them.
+
+`use:asDropZone={options}`
+
+is the classical pattern for Svelte actions. `use:asDropZone` supports the following options (bundled into an instance of type `DropZoneOptions`):
+
+* **``**<br>
 
 (t.b.w.)
 
