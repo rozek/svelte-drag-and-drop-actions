@@ -73,7 +73,7 @@ TypeScript programmers may import the following types in order to benefit from s
 
 ### use:asDraggable ###
 
-`use:asDraggable` should be used for elements which will only be dragged around (but never dropped onto another element). Many use cases (from dragable windows over draggable nodes of graphical shapes to the resize handles found in many visual designers) only need this kind of behaviour.
+`use:asDraggable` should be used for elements which will only be dragged around (but never dropped onto another element). Many use cases (from draggable windows over draggable nodes of graphical shapes to the resize handles found in many visual designers) only need this kind of behaviour.
 
 The type annotiations shown below are relevant for TypeScript programmers only, JavaScript programmers may simply ignore them.
 
