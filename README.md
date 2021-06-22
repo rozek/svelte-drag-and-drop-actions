@@ -133,6 +133,14 @@ is the classical pattern for Svelte actions. `use:asDropZone` supports the follo
 
 `use:asDropZone` may be combined with either `use:asDraggable` or `use:asDroppable` (not both together) in order to implement draggable drop zones which may itself be dropped over other drop zones.
 
+### Caveats ###
+
+Simply extending already existing native HTML5 drag-and-drop functionality has a lot of advantages - but also some disadvantages, as there are:
+
+* the cursor shown while dragging is under full control of the native drag-and-drop implementation and can not be influenced programmatically (with the minor exception of setting a proper drop operation for a Droppable)
+* a custom drag image must either be an image object or a visible(!) element within the document from which a snapshot is taken
+* the configured drag image can not be changed during dragging as it is constructed when dragging starts and never updated again
+
 ### Build Instructions ###
 
 You may easily build this package yourself.
