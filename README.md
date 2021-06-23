@@ -114,7 +114,27 @@ The type annotiations shown below are relevant for TypeScript programmers only, 
 
 is the classical pattern for Svelte actions. `use:asDroppable` supports the following options (bundled into an instance of type `DroppableOptions`) **in addition to** those listed under `use:asDraggable`:
 
-* **``**<br>
+
+* **`relativeTo?:PositionReference`**<br>`relativeTo` is an optional `PositionReference` (defaulting to `parent`) which specifies relative to which element the current mouse or touch position is measured during dragging. It may be set to `body` for measurements relative to the current document body, to `parent` for measurements relative to the Draggable's containing element, to a CSS selector for measurements relative to the Draggable's closest element matching the given selector (or 'body' otherwise) or to a given HTML or SVG element (which must be part of the document)<br>&nbsp;<br>
+* **`Dummy?:DragDummy`**<br>`Dummy` specifies which "drag image" to show at the current mouse or touch position during dragging. `Dummy` is optional (defaulting to `standard`) and may be set to `none` (effectively showing nothing), to `standard` (for the HTML5 standard behaviour which usually shows a semi-transparent copy of the actual draggable), to some HTML code (which is used to construct the element to be shown during dragging) or to an already existing HTML element (which must be visible). **Important**: creating a drag image from HTML is quite tricky - the approach used here is lightweight but may cause some flickering when dragging is started. Such flickering can usally be avoided by setting the CSS "overflow" of the "body" element to "hidden". Where this is not possible, constructing an image from HTML code using [html2canvas](https://github.com/niklasvh/html2canvas) may be an (albeit no longer lightweight) alternative
+* **`DummyOffsetX?:number`**<br>`DummyOffsetX` is an optional number (defaulting to 0) specifying the horizontal offset between the current x position of a mouse or finger during dragging and the shown drag image. It is used ay the second argument to `DataTransfer.setDragImage` without prior change
+* **`DummyOffsetY?:number`**<br>`DummyOffsetY` is an optional number (defaulting to 0) specifying the vertical offset between the current y position of a mouse or finger during dragging and the shown drag image. It is used ay the third argument to `DataTransfer.setDragImage` without prior change<br>&nbsp;<br>
+* **`minX?:number`**<br>`minX` is an optional number (defaulting to -Infinity) specifying the smallest possible value for the `x` component of any drag result. Please note: a configured drag image may well be dragged beyond configured limits - for that reason, such limits are most often combined with `Dummy:'none'` to effectively hide the drag image
+* **`minY?:number`**<br>`minY` is an optional number (defaulting to -Infinity) specifying the smallest possible value for the `y` component of any drag result. Please note: a configured drag image may well be dragged beyond configured limits - for that reason, such limits are most often combined with `Dummy:'none'` to effectively hide the drag image
+* **`maxX?:number`**<br>`maxX` is an optional number (defaulting to Infinity) specifying the largest possible value for the `x` component of any drag result. Please note: a configured drag image may well be dragged beyond configured limits - for that reason, such limits are most often combined with `Dummy:'none'` tto effectively hide the drag image
+* **`maxY?:number`**<br>`maxY` is an optional number (defaulting to Infinity) specifying the largest possible value for the `y` component of any drag result. Please note: a configured drag image may well be dragged beyond configured limits - for that reason, such limits are most often combined with `Dummy:'none'` to effectively hide the drag image<br>&nbsp;<br>
+* **`Entity?:any`**<br>
+* **`Operations?:string`**<br>
+* **`DataToOffer?:DataOfferSet`**<br>
+* **`onDragStart?:Position | (() => Position)`**<br>`onDragStart` is either an optional `Position` (defaulting to `{x:0, y:0}`) or a parameter-less function returning such a `Position`. In either case, this parameter specifies the coordinate values from which to start dragging. **Important**: these "coordinates" do not necessarily represent a particular point on the screen - in fact, e.g., a resize handle may choose to start with the current width and height of the element to be resized and then directly use the results of any `onDragMove` or `onDragEnd` as the new element width and height without additional computation
+* **`onDragMove?: (x:number,y:number, dx:number,dy:number) => void`**<br>`onDragMove` is an optional callback which (if given) is called repeatedly during dragging. When invoked, it receives the current drag result (in `x` and `y`, with an initial value chosen by `onDragStart`) and  the offset between this and the previous invocation (in `dx` and `dy`)
+* **`onDragEnd?:  (x:number,y:number, dx:number,dy:number) => void`**<br>`onDragEnd` is is an optional callback which (if given) is called once when dragging has finished. When invoked, it receives the final drag result (in `x` and `y`, with the origin chosen by `onDragStart`) and the offset between this and the most recent invocation of `onDragMove` (in `dx` and `dy`)
+* **`onDropZoneEnter?: (DropZoneEntity:any, x?:number,y?:number, Element?:HTMLElement | SVGElement) => void`**<br>
+* **`onDropZoneHover?: (DropZoneEntity:any, x?:number,y?:number, Element?:HTMLElement | SVGElement) => void`**<br>
+* **`onDropZoneLeave?: (DropZoneEntity:any, Element?:HTMLElement | SVGElement) => void`**<br>
+* **`onDropped?: (DropZoneEntity:any, x?:number,y?:number, Operation?:DropOperation, TypeTransferred?:string, DataTransferred?:any, Element?:HTMLElement | SVGElement) => void}`**<br>
+
+While being dragged, the CSS class `dragged` is assigned to the draggable element (not the drag image!). It will be removed again as soon as dragging has ended.
 
 (t.b.w.)
 
@@ -132,7 +152,15 @@ The type annotiations shown below are relevant for TypeScript programmers only, 
 
 is the classical pattern for Svelte actions. `use:asDropZone` supports the following options (bundled into an instance of type `DropZoneOptions`):
 
-* **``**<br>
+* **`Entity?:any`**<br>
+* **`TypesToAccept?:TypeAcceptanceSet`**<br>
+* **`HoldDelay?:number`**<br>
+* **`onDroppableEnter?: (DroppableEntity:any, x?:number,y?:number, Operation?:DropOperation, offeredTypeList?:string[], Element?:HTMLElement | SVGElement) => boolean|undefined`**<br>
+* **`onDroppableMove?: (DroppableEntity:any, x?:number,y?:number, Operation?:DropOperation, offeredTypeList?:string[], Element?:HTMLElement | SVGElement) => boolean|undefined`**<br>
+* **`onDroppableHold?: (DroppableEntity:any, x?:number,y?:number, Element?:HTMLElement | SVGElement) => void`**<br>
+* **`onDroppableRelease?:(Droppable:any, x?:number,y?:number, Element?:HTMLElement | SVGElement) => void`**<br>
+* **`onDroppableLeave?: (DroppableEntity:any, Element?:HTMLElement | SVGElement) => void`**<br>
+* **`onDrop?: (Droppable:any, x?:number,y?:number, Operation?:DropOperation, DataOffered?:any, Element?:HTMLElement | SVGElement) => string`**<br>
 
 (t.b.w.)
 
