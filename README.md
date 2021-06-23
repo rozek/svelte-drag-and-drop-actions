@@ -67,9 +67,14 @@ If this sounds too abstract, just have a look into the examples: many of them il
 TypeScript programmers may import the following types in order to benefit from static type checking:
 
 * `type Position = { x:number, y:number }`<br>a `Position` instance represents a single point in a linearly scaled cartesic coordinate system. It may be considered as the same coordinate system a browser uses when coordinates are measured in pixels (px) - with one important exception: the origin of this system can be chosen by the programmer. An intelligent choice of such an origin may simplify the callbacks provided for `svelte-drag-and-drop-actions` and allow to use delivered coordinates, f.e., to set the size of an element directly and without any need for additional calculations.
-* `type PositionReference = (`<br>&nbsp; `'parent' | 'body' | HTMLElement | SVGElement`<br>`)`<br>a `PositionReference` specifies, relative to which element the mouse or touch position is measured. This decision becomes important, if the referred element is scrollable and/or its position or size may be changed by external code (which is neither part of this module nor any of the configured callbacks)
+* `type PositionReference = (`<br>&nbsp; `'parent' | 'body' | HTMLElement | SVGElement // | MathMLElement`<br>`)`<br>a `PositionReference` specifies, relative to which element the mouse or touch position is measured. This decision becomes important, if the referred element is scrollable and/or its position or size may be changed by external code (which is neither part of this module nor any of the configured callbacks)
 * `type DragDummy = (`<br>&nbsp; `string | HTMLElement | SVGElement |`<br>&nbsp; `'standard' | 'none'`<br>`)`<br>a `DragDummy` specifies which drag image will be shown during dragging (see below for details)
-* `type DraggableOptions = {`<br>&nbsp; `relativeTo?:PositionReference,`<br>&nbsp; `Dummy?:DragDummy, DummyOffsetX?:number, DummyOffsetY?:number,`<br>&nbsp; `minX?:number, minY?:number, maxX?:number, maxY?:number,`<br>&nbsp; `onDragStart?:Position | (() => Position),`<br>&nbsp; `onDragMove?: (x:number,y:number, dx:number,dy:number) => void,`<br>&nbsp; `onDragEnd?:  (x:number,y:number, dx:number,dy:number) => void,`<br>`}`<br>a `DraggableOptions` instance holds all options for a "Draggable" (see below for details)
+* `type DraggableOptions = {`<br>&nbsp; `relativeTo?:PositionReference,`<br>&nbsp; `Dummy?:DragDummy, DummyOffsetX?:number, DummyOffsetY?:number,`<br>&nbsp; `minX?:number, minY?:number, maxX?:number, maxY?:number,`<br>&nbsp; `onDragStart?:Position | (() => Position),`<br>&nbsp; `onDragMove?: (x:number,y:number, dx:number,dy:number) => void,`<br>&nbsp; `onDragEnd?:  (x:number,y:number, dx:number,dy:number) => void,`<br>`}`<br>a `DraggableOptions` instance holds all options for a "Draggable" (see below for details)<br>&nbsp;<br>
+* `type DropOperation = 'copy'|'move'|'link'`<br>a `DropOperation` specifies whether the data associated with a droppable element should be copied, moved or linked to a drop target (native HTML5 DnD jargon calls this an "effect")
+* `type DataOfferSet = { [Type:string]:string }`<br>`DataOfferSet`s are dictionaries listing the various data formats offered by a droppable object and the offered data in every format. The keys into a `DataOfferSet` are often MIME types but could well be any kind of string - a detail which is often used to overcome some limitations of native HTML 5 DnD
+* `type DroppableOptions = DraggableOptions & {`<br>&nbsp; `Entity?:any, Operations?:string, DataToOffer?:DataOfferSet,`<br>&nbsp; `onDropZoneEnter?: (DropZone:any, x?:number,y?:number, Element?:HTMLElement | SVGElement) => void,`<br>&nbsp; `onDropZoneHover?: (DropZone:any, x?:number,y?:number, Element?:HTMLElement | SVGElement) => void,`<br>&nbsp; `onDropZoneLeave?: (DropZone:any, Element?:HTMLElement | SVGElement) => void,`<br>&nbsp; `onDropped?:       (DropZone:any, x?:number,y?:number, Operation?:DropOperation,`<br>&nbsp; `TypeTransferred?:string, DataTransferred?:any,`<br>&nbsp; &nbsp; `Element?:HTMLElement | SVGElement) => void`<br>&nbsp; `}`<br>a `DroppableOptions` instance holds all *extra* options for a "Droppable" - in addition to `DraggableOptions` (see below for details)<br>&nbsp;<br>
+* `type TypeAcceptanceSet = { [Type:string]:string }`<br>`TypeAcceptanceSet`s are dictionaries listing the various data formats accepted by a drop zone and the permitted drop operations for every format. The keys into a `TypeAcceptanceSet` are the same as for the abovementioned `DataOfferSet`s
+* `type DropZoneOptions = {`<br>&nbsp; `Entity?:any, TypesToAccept?:TypeAcceptanceSet, HoldDelay?:number,`<br>&nbsp; `onDroppableEnter?:  (Droppable:any, x?:number,y?:number, Operation?:DropOperation,`<br>&nbsp; &nbsp; `offeredTypeList?:string[], Element?:HTMLElement | SVGElement) => boolean|undefined,`<br>&nbsp; `onDroppableMove?:   (Droppable:any, x?:number,y?:number, Operation?:DropOperation,`<br>&nbsp; &nbsp; `offeredTypeList?:string[], Element?:HTMLElement | SVGElement) => boolean|undefined,`<br>&nbsp; `onDroppableHold?:   (Droppable:any, x?:number,y?:number, Element?:HTMLElement | SVGElement) => void,`<br>&nbsp; `onDroppableRelease?:(Droppable:any, x?:number,y?:number, Element?:HTMLElement | SVGElement) => void,`<br>&nbsp; `onDroppableLeave?:  (Droppable:any, Element?:HTMLElement | SVGElement) => void,`<br>&nbsp; `onDrop?:            (Droppable:any, x?:number,y?:number, Operation?:DropOperation,`<br>&nbsp; &nbsp; `DataOffered?:any, Element?:HTMLElement | SVGElement) => string`<br>&`}`<br>a `DropZoneOptions` instance holds all options for a "DropZone" (see below for details)
 
 ### use:asDraggable ###
 
@@ -119,7 +124,7 @@ is the classical pattern for Svelte actions. `use:asDroppable` supports the foll
 
 ### use:asDropZone ###
 
-`use:asDropZone` marks an element as a "drop zone" which allows "droppable" elements to be dropped onto it in order to trigger an operation. 
+`use:asDropZone` marks an element as a "drop zone" which allows "droppable" elements to be dropped onto it in order to trigger an operation.
 
 The type annotiations shown below are relevant for TypeScript programmers only, JavaScript programmers may simply ignore them.
 
@@ -132,6 +137,7 @@ is the classical pattern for Svelte actions. `use:asDropZone` supports the follo
 (t.b.w.)
 
 `use:asDropZone` may be combined with either `use:asDraggable` or `use:asDroppable` (not both together) in order to implement draggable drop zones which may itself be dropped over other drop zones.
+
 
 ### Caveats ###
 
@@ -147,7 +153,7 @@ You may easily build this package yourself.
 
 Just install [NPM](https://docs.npmjs.com/) according to the instructions for your platform and follow these steps:
 
-1. either clone this repository using [git](https://git-scm.com/) or [download a ZIP archive](https://github.com/rozek/svelte-drag-and-drop-actions/archive/refs/heads/main.zip) with its contents to your disk and unpack it there 
+1. either clone this repository using [git](https://git-scm.com/) or [download a ZIP archive](https://github.com/rozek/svelte-drag-and-drop-actions/archive/refs/heads/main.zip) with its contents to your disk and unpack it there
 2. open a shell and navigate to the root directory of this repository
 3. run `npm install` in order to install the complete build environment
 4. execute `npm run build` to create a new build
