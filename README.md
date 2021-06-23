@@ -112,7 +112,7 @@ The type annotiations shown below are relevant for TypeScript programmers only, 
 
 `use:asDroppable={options}`
 
-is the classical pattern for Svelte actions. `use:asDroppable` supports the following options (bundled into an instance of type `DroppableOptions`):
+is the classical pattern for Svelte actions. `use:asDroppable` supports the following options (bundled into an instance of type `DroppableOptions`) **in addition to** those listed under `use:asDraggable`:
 
 * **``**<br>
 
