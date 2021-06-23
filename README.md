@@ -165,7 +165,13 @@ While being hovered by a droppable whose data offered is at least partially acce
 `use:asDropZone` may be combined with either `use:asDraggable` or `use:asDroppable` (not both together) in order to implement draggable drop zones which may perhaps itself be dropped over other drop zones.
 ### Examples ###
 
-(t.b.w.)
+#### Dragging only ####
+
+* [standard dragging](https://svelte.dev/repl/da5c51729c974c8b950e8de4bdb7d1c5) - shows hardly more than HTML5 drag-and-drop, but proves that it still works
+
+#### Drag-and-Drop ####
+
+
 
 ### Caveats ###
 
