@@ -175,10 +175,12 @@ While being hovered by a droppable whose data offered is at least partially acce
 * [draggable Button](https://svelte.dev/repl/ba1d1ce67c0b40439ea5e3015d6d36bf) - drags a button which remains clickable
 * [draggable Note](https://svelte.dev/repl/03727e9474614e678b23fdaa1cbf5003) - drags a "note", but only from its title bar
 * [draggable resizable Note](https://svelte.dev/repl/86663312b0034250943904ed537feff8) - adds a "resize" handle to the draggable note
+* [Line Node Dragging](https://svelte.dev/repl/3f5f997239c645029cb2afb6f33ae635) - lets drag the handles at the end of a straight line
+* (more to come by tomorrow)
 
 #### Drag-and-Drop ####
 
-
+* (will come tomorrow)
 
 ### Caveats ###
 
