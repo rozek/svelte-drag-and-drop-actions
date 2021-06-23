@@ -171,6 +171,7 @@ While being hovered by a droppable whose data offered is at least partially acce
 * [plain dragging](https://svelte.dev/repl/e779dd6b998a4c0ba94e417dd2a66c16) - drags an object itself (not a "ghost" or "dummy")
 * [plain dragging within region](https://svelte.dev/repl/6e98523988f54335bf2e2307e79b4173) - restricts dragging to a given region
 * [plain dragging a custom dummy](https://svelte.dev/repl/801170099918424c998f689a3c6b2ddc) - drags a custom dummy made from HTML
+* [plain dragging an existing dummy](https://svelte.dev/repl/ee2a354b389049fa87da061ab7731c53) - drags a dummy built from an existing HTML element (which must be visible, however)
 
 #### Drag-and-Drop ####
 
