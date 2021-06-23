@@ -168,6 +168,7 @@ While being hovered by a droppable whose data offered is at least partially acce
 #### Dragging only ####
 
 * [standard dragging](https://svelte.dev/repl/da5c51729c974c8b950e8de4bdb7d1c5) - shows hardly more than HTML5 drag-and-drop, but proves that it still works
+* [plain dragging](https://svelte.dev/repl/e779dd6b998a4c0ba94e417dd2a66c16) - ilustrates plain dragging of an object
 
 #### Drag-and-Drop ####
 
