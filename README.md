@@ -186,6 +186,7 @@ While being hovered by a droppable whose data offered is at least partially acce
 * [quadratic Bezier Curve Node Dragging](https://svelte.dev/repl/78c7766012894a33afbc665234c35f9b) - lets drag the control points of a quadratic bezier curve
 * [cubic Bezier Curve Node Dragging](https://svelte.dev/repl/e9c64887e2684146acdc16e9af13193e) - lets drag the control points of a cubic bezier curve
 * [Resize Handles](https://svelte.dev/repl/1a620cee8fe9402a8063efea8b164232) - demonstrates the "classical" positioning and shaping of a rectangular element using a selection frame and handles
+* [Resize Handles for Mouse, Pen and Touch Input](52e662d6220d447495be8cd8851322b9) - like above but with proper handle sizes for devices with mouse, pen or touch input
 
 ### Drag-and-Drop ###
 
