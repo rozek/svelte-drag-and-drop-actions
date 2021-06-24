@@ -174,7 +174,7 @@ While being hovered by a droppable whose data offered is at least partially acce
 
 * [standard dragging](https://svelte.dev/repl/da5c51729c974c8b950e8de4bdb7d1c5) - shows hardly more than HTML5 drag-and-drop, but proves that it still works
 * [plain dragging](https://svelte.dev/repl/e779dd6b998a4c0ba94e417dd2a66c16) - drags an object itself (not a "ghost" or "dummy")
-* [plain dragging with CSS class "dragged"](https://svelte.dev/repl/019d96b653b1418785c06e5cb3ad1d59) - illustrates usage of CSS class "dragged" assigned to a Draggable during dragging
+* [plain dragging with CSS class "dragged"](https://svelte.dev/repl/019d96b653b1418785c06e5cb3ad1d59) - demonstrates usage of CSS class "dragged" assigned to a Draggable during dragging
 * [plain dragging within region](https://svelte.dev/repl/6e98523988f54335bf2e2307e79b4173) - restricts dragging to a given region
 * [plain dragging a custom dummy](https://svelte.dev/repl/801170099918424c998f689a3c6b2ddc) - drags a custom dummy made from HTML
 * [plain dragging an existing dummy](https://svelte.dev/repl/ee2a354b389049fa87da061ab7731c53) - drags a dummy built from an existing HTML element (which must be visible, however)
@@ -191,6 +191,7 @@ While being hovered by a droppable whose data offered is at least partially acce
 
 * [standard drag-and-drop](https://svelte.dev/repl/8e0ec7bf90bf4ad889b48ff6029bf1f6) - demonstrates the sequence of callbacks for droppables and drop zones
 * [standard drop](https://svelte.dev/repl/097fdce459684421aa11d53cea4b48e7) - logs callbacks for actual drop operations only
+* [standard drop with CSS class "dragged"](https://svelte.dev/repl/08ad7687579b4e29a9a4f87446e0cfee) - demonstrates usage of CSS class "dragged" assigned to a Droppable during dragging
 * [type-specific drop](https://svelte.dev/repl/64cdbfb322f84eac8aa150ba6470e948) - illustrates determination of droppability based on offered types
 * [operation-specific drop](https://svelte.dev/repl/263f54e6cbad489a861517bedb848e3b) - would illustrate the determination of droppability based on offered operations, if browsers would properly implement HTML5 drag-and-drop (i.e., may work in some browsers and "fail" in others)
 
