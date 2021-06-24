@@ -194,6 +194,7 @@ While being hovered by a droppable whose data offered is at least partially acce
 * [standard drop](https://svelte.dev/repl/097fdce459684421aa11d53cea4b48e7) - logs callbacks for actual drop operations only
 * [plain drag-and-drop with CSS class "dragged"](https://svelte.dev/repl/08ad7687579b4e29a9a4f87446e0cfee) - demonstrates usage of CSS class "dragged" assigned to a Droppable during dragging
 * [type-specific drop](https://svelte.dev/repl/64cdbfb322f84eac8aa150ba6470e948) - illustrates determination of droppability based on offered types
+* [type-specific drop with CSS class "hovered"](https://svelte.dev/repl/b354d5e23d7a4b09ad50af5114561e6a) - demonstrates visual feedback of drop zones while hovered by a matching droppable based on CSS class "hovered"
 * [operation-specific drop](https://svelte.dev/repl/263f54e6cbad489a861517bedb848e3b) - would illustrate the determination of droppability based on offered operations, if browsers would properly implement HTML5 drag-and-drop (i.e., may work in some browsers and "fail" in others)
 
 
