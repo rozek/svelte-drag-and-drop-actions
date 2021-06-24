@@ -186,7 +186,7 @@ While being hovered by a droppable whose data offered is at least partially acce
 
 #### Drag-and-Drop ####
 
-* (will come tomorrow)
+* [standard drag-and-drop](https://svelte.dev/repl/8e0ec7bf90bf4ad889b48ff6029bf1f6)
 
 
 
