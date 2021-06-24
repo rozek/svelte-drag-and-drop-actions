@@ -721,7 +721,12 @@
 
       let wantedOperation:any = originalEvent.dataTransfer.dropEffect
       if (wantedOperation === 'none') {            // workaround for browser bug
-        wantedOperation = undefined
+        switch (originalEvent.dataTransfer.effectAllowed) {
+          case 'copy': case 'move': case 'link':
+            wantedOperation = originalEvent.dataTransfer.effectAllowed; break
+          default:
+            wantedOperation = undefined
+        }
       }
 
       let TypesToAccept   = Options.TypesToAccept as TypeAcceptanceSet
@@ -768,7 +773,12 @@
 
       let wantedOperation:any = originalEvent.dataTransfer.dropEffect
       if (wantedOperation === 'none') {            // workaround for browser bug
-        wantedOperation = undefined
+        switch (originalEvent.dataTransfer.effectAllowed) {
+          case 'copy': case 'move': case 'link':
+            wantedOperation = originalEvent.dataTransfer.effectAllowed; break
+          default:
+            wantedOperation = undefined
+        }
       }
 
       let TypesToAccept   = Options.TypesToAccept as TypeAcceptanceSet
@@ -851,7 +861,12 @@
 
       let wantedOperation:any = originalEvent.dataTransfer.dropEffect
       if (wantedOperation === 'none') {            // workaround for browser bug
-        wantedOperation = undefined
+        switch (originalEvent.dataTransfer.effectAllowed) {
+          case 'copy': case 'move': case 'link':
+            wantedOperation = originalEvent.dataTransfer.effectAllowed; break
+          default:
+            wantedOperation = undefined
+        }
       }
 
       let TypesToAccept   = Options.TypesToAccept as TypeAcceptanceSet
