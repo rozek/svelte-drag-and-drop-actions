@@ -125,7 +125,7 @@
     let initialPosition:Position                    // given in user coordinates
     let lastPosition:   Position                                         // dto.
 
-    Options = currentDraggableOptions = parsedDraggableOptions(Options)
+    currentDraggableOptions = parsedDraggableOptions(Options)
 
   /**** startDragging ****/
 
@@ -337,9 +337,11 @@
   function parsedDroppableOptions (Options:any):DroppableOptions {
     Options = allowedPlainObject('drop options',Options) || {}
 
-    let Operations:string, DataToOffer:DataOfferSet
+    let Extras:any, Operations:string, DataToOffer:DataOfferSet
     let onDropZoneEnter:Function, onDropZoneHover:Function, onDropZoneLeave:Function
     let onDropped:Function
+
+    Extras = Options.Extras
 
     Operations  = parsedOperations('list of allowed operations',Options.Operations,'copy')
     DataToOffer = Object.assign(
@@ -352,7 +354,7 @@
     onDropped       = allowedFunction('"onDropped" handler',      Options.onDropped)
 
     return {
-      Operations, DataToOffer,
+      Extras, Operations, DataToOffer,
 // @ts-ignore
       onDropZoneEnter, onDropZoneHover, onDropZoneLeave, onDropped
     }
@@ -378,8 +380,6 @@
 
     currentDraggableOptions = parsedDraggableOptions(Options)
     currentDroppableOptions = parsedDroppableOptions(Options)
-
-    Options = Object.assign(currentDraggableOptions,currentDroppableOptions)
 
   /**** startDragging ****/
 
@@ -476,8 +476,7 @@
         }
       }
 
-      currentDroppableExtras = Options.Extras
-
+      currentDroppableExtras  = Options.Extras
       currentDropZoneExtras   = undefined
       currentDropZonePosition = undefined
 
@@ -707,7 +706,7 @@
   ) {
     let currentDropZoneOptions:DropZoneOptions
 
-    Options = currentDropZoneOptions = parsedDropZoneOptions(Options)
+    currentDropZoneOptions = parsedDropZoneOptions(Options)
 
   /**** enteredByDroppable ****/
 
