@@ -207,7 +207,7 @@
         originalEvent.dataTransfer.effectAllowed = 'none'
       }
 
-      Element.classList.add('dragged')
+      setTimeout(() => Element.classList.add('dragged'), 0)
 
       originalEvent.stopPropagation()
     }
@@ -486,7 +486,7 @@
       currentTypeTransferred  = undefined
       currentDataTransferred  = undefined
 
-      Element.classList.add('dragged')
+      setTimeout(() => Element.classList.add('dragged'), 0)
 
       originalEvent.stopPropagation()
     }
