@@ -804,7 +804,15 @@ function asDropZone(Element, Options) {
         var Options = currentDropZoneOptions;
         var wantedOperation = originalEvent.dataTransfer.dropEffect;
         if (wantedOperation === 'none') { // workaround for browser bug
-            wantedOperation = undefined;
+            switch (originalEvent.dataTransfer.effectAllowed) {
+                case 'copy':
+                case 'move':
+                case 'link':
+                    wantedOperation = originalEvent.dataTransfer.effectAllowed;
+                    break;
+                default:
+                    wantedOperation = undefined;
+            }
         }
         var TypesToAccept = Options.TypesToAccept;
         var offeredTypeList = originalEvent.dataTransfer.types.filter(function (Type) {
@@ -839,7 +847,15 @@ function asDropZone(Element, Options) {
         var Options = currentDropZoneOptions;
         var wantedOperation = originalEvent.dataTransfer.dropEffect;
         if (wantedOperation === 'none') { // workaround for browser bug
-            wantedOperation = undefined;
+            switch (originalEvent.dataTransfer.effectAllowed) {
+                case 'copy':
+                case 'move':
+                case 'link':
+                    wantedOperation = originalEvent.dataTransfer.effectAllowed;
+                    break;
+                default:
+                    wantedOperation = undefined;
+            }
         }
         var TypesToAccept = Options.TypesToAccept;
         var offeredTypeList = originalEvent.dataTransfer.types.filter(function (Type) {
@@ -899,7 +915,15 @@ function asDropZone(Element, Options) {
         var Options = currentDropZoneOptions;
         var wantedOperation = originalEvent.dataTransfer.dropEffect;
         if (wantedOperation === 'none') { // workaround for browser bug
-            wantedOperation = undefined;
+            switch (originalEvent.dataTransfer.effectAllowed) {
+                case 'copy':
+                case 'move':
+                case 'link':
+                    wantedOperation = originalEvent.dataTransfer.effectAllowed;
+                    break;
+                default:
+                    wantedOperation = undefined;
+            }
         }
         var TypesToAccept = Options.TypesToAccept;
         var offeredTypeList = originalEvent.dataTransfer.types.filter(function (Type) {
