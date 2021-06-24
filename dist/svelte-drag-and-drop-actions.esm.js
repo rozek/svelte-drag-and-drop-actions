@@ -306,14 +306,6 @@ function ObjectIsEmpty(Candidate) {
 function ObjectIsNotEmpty(Candidate) {
     return !ObjectIsEmpty(Candidate);
 }
-/**** StringIsEmpty ****/
-function StringIsEmpty(Candidate) {
-    return /^\s*$/.test(Candidate);
-}
-/**** StringIsNotEmpty ****/
-function StringIsNotEmpty(Candidate) {
-    return !StringIsEmpty(Candidate);
-}
 /**** constrained ****/
 function constrained(Value, Minimum, Maximum) {
     if (Minimum === void 0) { Minimum = -Infinity; }
@@ -324,14 +316,14 @@ function constrained(Value, Minimum, Maximum) {
 var e={fromViewportTo:function(e,t,o){switch(!0){case null==t:throw new Error('no "Position" given');case"number"!=typeof t.left&&!(t.left instanceof Number):case"number"!=typeof t.top&&!(t.top instanceof Number):throw new Error('invalid "Position" given')}switch(e){case null:case void 0:throw new Error("no coordinate system given");case"viewport":return {left:t.left,top:t.top};case"document":return {left:t.left+window.scrollX,top:t.top+window.scrollY};case"local":switch(!0){case null==o:throw new Error("no target element given");case o instanceof Element:var r=window.getComputedStyle(o),n=parseFloat(r.borderLeftWidth),i=parseFloat(r.borderTopWidth),l=o.getBoundingClientRect();return {left:t.left-l.left-n,top:t.top-l.top-i};default:throw new Error("invalid target element given")}default:throw new Error("invalid coordinate system given")}},fromDocumentTo:function(e,t,o){switch(!0){case null==t:throw new Error('no "Position" given');case"number"!=typeof t.left&&!(t.left instanceof Number):case"number"!=typeof t.top&&!(t.top instanceof Number):throw new Error('invalid "Position" given')}switch(e){case null:case void 0:throw new Error("no coordinate system given");case"viewport":return {left:t.left-window.scrollX,top:t.top-window.scrollY};case"document":return {left:t.left,top:t.top};case"local":switch(!0){case null==o:throw new Error("no target element given");case o instanceof Element:var r=window.getComputedStyle(o),n=parseFloat(r.borderLeftWidth),i=parseFloat(r.borderTopWidth),l=o.getBoundingClientRect();return {left:t.left+window.scrollX-l.left-n,top:t.top+window.scrollY-l.top-i};default:throw new Error("invalid target element given")}default:throw new Error("invalid coordinate system given")}},fromLocalTo:function(e,t,o){switch(!0){case null==t:throw new Error('no "Position" given');case"number"!=typeof t.left&&!(t.left instanceof Number):case"number"!=typeof t.top&&!(t.top instanceof Number):throw new Error('invalid "Position" given')}var r,n,i;switch(!0){case null==o:throw new Error("no source element given");case o instanceof Element:var l=window.getComputedStyle(o),a=parseFloat(l.borderLeftWidth),s=parseFloat(l.borderTopWidth);n=(r=o.getBoundingClientRect()).left+a,i=r.top+s;break;default:throw new Error("invalid source element given")}switch(e){case null:case void 0:throw new Error("no coordinate system given");case"viewport":return {left:t.left+n,top:t.top+i};case"document":return {left:t.left+n+window.scrollX,top:t.top+i+window.scrollY};case"local":return {left:t.left,top:t.top};default:throw new Error("invalid coordinate system given")}}};
 
 //----------------------------------------------------------------------------//
-var localId = Date.now() + '-' + Math.random(); // identifies this browser
 /**** parsedDraggableOptions ****/
 function parsedDraggableOptions(Options) {
     Options = allowedPlainObject('drag options', Options) || {};
-    var relativeTo;
+    var Extras, relativeTo;
     var Dummy, DummyOffsetX, DummyOffsetY;
     var minX, minY, maxX, maxY;
     var onDragStart, onDragMove, onDragEnd, onDragCancel;
+    Extras = Options.Extras;
     switch (true) {
         case (Options.relativeTo == null):
             relativeTo = 'parent';
@@ -388,6 +380,7 @@ function parsedDraggableOptions(Options) {
     onDragMove = allowedFunction('"onDragMove" handler', Options.onDragMove);
     onDragEnd = allowedFunction('"onDragEnd" handler', Options.onDragEnd);
     return {
+        Extras: Extras,
         relativeTo: relativeTo,
         Dummy: Dummy,
         DummyOffsetX: DummyOffsetX,
@@ -425,7 +418,7 @@ function asDraggable(Element, Options) {
         }
         else {
             try {
-                var StartPosition = Options.onDragStart(Element);
+                var StartPosition = Options.onDragStart(Options.Extras);
                 if (ValueIsPlainObject(StartPosition)) {
                     var x = allowedFiniteNumber('x start position', StartPosition.x);
                     var y = allowedFiniteNumber('y start position', StartPosition.y);
@@ -498,7 +491,7 @@ function asDraggable(Element, Options) {
             var dx = x - lastPosition.x; // calculated AFTER constraining x,y
             var dy = y - lastPosition.y; // dto.
             lastPosition = { x: x, y: y };
-            invokeHandler('onDragMove', Options, x, y, dx, dy, Element);
+            invokeHandler('onDragMove', Options, x, y, dx, dy, Options.Extras);
         }
         originalEvent.stopPropagation();
     }
@@ -511,7 +504,7 @@ function asDraggable(Element, Options) {
             var y = constrained(lastPosition.y, Options.minY, Options.maxY);
             var dx = x - lastPosition.x;
             var dy = y - lastPosition.y;
-            invokeHandler('onDragEnd', Options, x, y, dx, dy, Element);
+            invokeHandler('onDragEnd', Options, x, y, dx, dy, Options.Extras);
         }
         Element.classList.remove('dragged');
         originalEvent.stopPropagation();
@@ -536,8 +529,8 @@ function asDraggable(Element, Options) {
     return { update: updateDraggableOptions };
 }
 /**** extended Drag-and-Drop Support ****/
-var currentDroppableEntity; // currently dragged droppable
-var currentDropZoneEntity; // currently hovered drop zone
+var currentDroppableExtras; // extras for currently dragged droppable
+var currentDropZoneExtras; // extras for currently hovered drop zone
 var currentDropZoneElement; // dto. as Element
 var DroppableWasDropped; // indicates a successful drop operation
 var currentDropZonePosition; // position relative to DropZone
@@ -551,22 +544,16 @@ var DropOperations = ['copy', 'move', 'link'];
 /**** parsedDroppableOptions ****/
 function parsedDroppableOptions(Options) {
     Options = allowedPlainObject('drop options', Options) || {};
-    var Entity, Operations, DataToOffer;
+    var Operations, DataToOffer;
     var onDropZoneEnter, onDropZoneHover, onDropZoneLeave;
     var onDropped;
-    Entity = Options.Entity;
     Operations = parsedOperations('list of allowed operations', Options.Operations, 'copy');
     DataToOffer = Object.assign({}, allowedPlainObject('data to be offered', Options.DataToOffer));
-    if (('#' in DataToOffer) ||
-        ObjectIsEmpty(DataToOffer) && StringIsNotEmpty(Operations)) {
-        DataToOffer['#'] = localId; // for passing objects within this app
-    }
     onDropZoneEnter = allowedFunction('"onDropZoneEnter" handler', Options.onDropZoneEnter);
     onDropZoneHover = allowedFunction('"onDropZoneHover" handler', Options.onDropZoneHover);
     onDropZoneLeave = allowedFunction('"onDropZoneLeave" handler', Options.onDropZoneLeave);
     onDropped = allowedFunction('"onDropped" handler', Options.onDropped);
     return {
-        Entity: Entity,
         Operations: Operations,
         DataToOffer: DataToOffer,
         // @ts-ignore
@@ -586,7 +573,8 @@ function asDroppable(Element, Options) {
     var DragImage;
     var initialPosition; // given in user coordinates
     var lastPosition; // dto.
-    var lastDropZoneEntity;
+    var lastDropZoneElement;
+    var lastDropZoneExtras;
     currentDraggableOptions = parsedDraggableOptions(Options);
     currentDroppableOptions = parsedDroppableOptions(Options);
     Options = Object.assign(currentDraggableOptions, currentDroppableOptions);
@@ -602,7 +590,7 @@ function asDroppable(Element, Options) {
         }
         else {
             try {
-                var StartPosition = Options.onDragStart(Element);
+                var StartPosition = Options.onDragStart(Options.Extras);
                 if (ValueIsPlainObject(StartPosition)) {
                     var x = allowedFiniteNumber('x start position', StartPosition.x);
                     var y = allowedFiniteNumber('y start position', StartPosition.y);
@@ -618,7 +606,8 @@ function asDroppable(Element, Options) {
             }
         }
         lastPosition = initialPosition;
-        lastDropZoneEntity = undefined;
+        lastDropZoneElement = undefined;
+        lastDropZoneExtras = undefined;
         PositioningWasDelayed = false; // initializes workaround
         if (Options.Dummy == null) {
             Options.Dummy = 'standard'; // this is the default for "use.asDroppable"
@@ -664,8 +653,8 @@ function asDroppable(Element, Options) {
                 }
             }
         }
-        currentDroppableEntity = Options.Entity;
-        currentDropZoneEntity = undefined;
+        currentDroppableExtras = Options.Extras;
+        currentDropZoneExtras = undefined;
         currentDropZonePosition = undefined;
         DroppableWasDropped = false;
         currentDropOperation = undefined;
@@ -691,25 +680,24 @@ function asDroppable(Element, Options) {
             var dx = x - lastPosition.x; // calculated AFTER constraining x,y
             var dy = y - lastPosition.y; // dto.
             lastPosition = { x: x, y: y };
-            if (Options.onDragMove != null) {
-                invokeHandler('onDragMove', Options, x, y, dx, dy, Element);
-            }
+            invokeHandler('onDragMove', Options, x, y, dx, dy, Options.Extras);
         }
-        if (currentDropZoneEntity === lastDropZoneEntity) {
-            if (currentDropZoneEntity != null) {
-                invokeHandler('onDropZoneHover', Options, currentDropZoneEntity, currentDropZonePosition.x, currentDropZonePosition.y, Element);
+        if (currentDropZoneElement === lastDropZoneElement) {
+            if (currentDropZoneElement != null) {
+                invokeHandler('onDropZoneHover', Options, currentDropZonePosition.x, currentDropZonePosition.y, currentDropZoneExtras, Options.Extras);
             }
         }
         else {
-            if (currentDropZoneEntity == null) {
+            if (currentDropZoneElement == null) {
                 Element.classList.remove('droppable');
-                invokeHandler('onDropZoneLeave', Options, lastDropZoneEntity, Element);
+                invokeHandler('onDropZoneLeave', Options, lastDropZoneExtras, Options.Extras);
             }
             else {
                 Element.classList.add('droppable');
-                invokeHandler('onDropZoneEnter', Options, lastDropZoneEntity, currentDropZonePosition.x, currentDropZonePosition.y, Element);
+                invokeHandler('onDropZoneEnter', Options, currentDropZonePosition.x, currentDropZonePosition.y, lastDropZoneExtras, Options.Extras);
             }
-            lastDropZoneEntity = currentDropZoneEntity;
+            lastDropZoneElement = currentDropZoneElement;
+            lastDropZoneExtras = currentDropZoneExtras;
         }
         originalEvent.stopPropagation();
     }
@@ -718,8 +706,8 @@ function asDroppable(Element, Options) {
         //    continueDragging(originalEvent)           // NO! positions might be wrong!
         var Options = Object.assign({}, currentDraggableOptions, currentDroppableOptions);
         if (DroppableWasDropped) {
-            invokeHandler('onDropped', Options, currentDropZoneEntity, currentDropZonePosition.x, currentDropZonePosition.y, currentDropOperation, currentTypeTransferred, currentDataTransferred, Element);
-            currentDropZoneEntity = undefined;
+            invokeHandler('onDropped', Options, currentDropZonePosition.x, currentDropZonePosition.y, currentDropOperation, currentTypeTransferred, currentDataTransferred, currentDropZoneExtras, Options.Extras);
+            currentDropZoneExtras = undefined;
             currentDropZonePosition = undefined;
             DroppableWasDropped = false;
             currentDropOperation = undefined;
@@ -731,9 +719,9 @@ function asDroppable(Element, Options) {
             var y = constrained(lastPosition.y, Options.minY, Options.maxY);
             var dx = x - lastPosition.x;
             var dy = y - lastPosition.y;
-            invokeHandler('onDragEnd', Options, x, y, dx, dy);
+            invokeHandler('onDragEnd', Options, x, y, dx, dy, Options.Extras);
         }
-        currentDroppableEntity = undefined;
+        currentDroppableExtras = undefined;
         Element.classList.remove('dragged', 'droppable');
         originalEvent.stopPropagation();
     }
@@ -746,11 +734,12 @@ function asDroppable(Element, Options) {
         currentDraggableOptions.maxX = Options.maxX;
         currentDraggableOptions.maxY = Options.maxY;
         currentDraggableOptions.onDragStart = (Options.onDragStart || currentDraggableOptions.onDragStart); // may be used to update initial position for subsequent drags
-    } /**** updateDroppableOptions ****/
+    }
+    /**** updateDroppableOptions ****/
     function updateDroppableOptions(Options) {
         Options = parsedDroppableOptions(Options);
-        if (Options.Entity != null) {
-            currentDroppableOptions.Entity = Options.Entity;
+        if (Options.Extras != null) {
+            currentDroppableOptions.Extras = Options.Extras;
         }
     }
     Element.setAttribute('draggable', 'true');
@@ -770,10 +759,10 @@ function asDroppable(Element, Options) {
 /**** parsedDropZoneOptions ****/
 function parsedDropZoneOptions(Options) {
     Options = allowedPlainObject('drop zone options', Options) || {};
-    var Entity, TypesToAccept, HoldDelay;
+    var Extras, TypesToAccept, HoldDelay;
     var onDroppableEnter, onDroppableMove, onDroppableLeave;
     var onDroppableHold, onDroppableRelease, onDrop;
-    Entity = Options.Entity;
+    Extras = Options.Extras;
     allowPlainObject('data types to be accepted', Options.TypesToAccept);
     TypesToAccept = Object.create(null);
     for (var Type in Options.TypesToAccept) {
@@ -789,7 +778,7 @@ function parsedDropZoneOptions(Options) {
     onDroppableRelease = allowedFunction('"onDroppableRelease" handler', Options.onDroppableRelease);
     onDrop = allowedFunction('"onDrop" handler', Options.onDrop);
     return {
-        Entity: Entity,
+        Extras: Extras,
         TypesToAccept: TypesToAccept,
         HoldDelay: HoldDelay,
         // @ts-ignore
@@ -827,12 +816,12 @@ function asDropZone(Element, Options) {
             return;
         }
         var DropZonePosition = asPosition(e.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, Element)); // relative to DropZone element
-        var accepted = ResultOfHandler('onDroppableEnter', Options, currentDroppableEntity, DropZonePosition.x, DropZonePosition.y, wantedOperation, offeredTypeList, Element);
+        var accepted = ResultOfHandler('onDroppableEnter', Options, DropZonePosition.x, DropZonePosition.y, wantedOperation, offeredTypeList, currentDroppableExtras, Options.Extras);
         if (accepted === false) {
             return;
         }
         else {
-            currentDropZoneEntity = Options.Entity;
+            currentDropZoneExtras = Options.Extras;
             currentDropZoneElement = Element;
             currentDropZonePosition = DropZonePosition;
             Element.classList.add('hovered');
@@ -860,7 +849,7 @@ function asDropZone(Element, Options) {
         ); // cannot use "originalEvent.dataTransfer.dropEffect" due to browser bug
         if (offeredTypeList.length === 0) {
             if (currentDropZoneElement === Element) {
-                currentDropZoneEntity = undefined;
+                currentDropZoneExtras = undefined;
                 currentDropZoneElement = undefined;
                 currentDropZonePosition = undefined;
                 Element.classList.remove('hovered');
@@ -868,9 +857,9 @@ function asDropZone(Element, Options) {
             return;
         }
         currentDropZonePosition = asPosition(e.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, Element)); // relative to DropZone element
-        var accepted = ResultOfHandler('onDroppableMove', Options, currentDroppableEntity, currentDropZonePosition.x, currentDropZonePosition.y, wantedOperation, offeredTypeList, Element);
+        var accepted = ResultOfHandler('onDroppableMove', Options, currentDropZonePosition.x, currentDropZonePosition.y, wantedOperation, offeredTypeList, currentDroppableExtras, Options.Extras);
         if (accepted === false) {
-            currentDropZoneEntity = undefined;
+            currentDropZoneExtras = undefined;
             currentDropZoneElement = undefined;
             currentDropZonePosition = undefined;
             Element.classList.remove('hovered');
@@ -885,14 +874,14 @@ function asDropZone(Element, Options) {
         var Options = currentDropZoneOptions;
         if (currentDropZoneElement === Element) {
             if (currentTypeTransferred == null) {
-                currentDropZoneEntity = undefined;
+                currentDropZoneExtras = undefined;
                 currentDropZoneElement = undefined;
                 DroppableWasDropped = false;
                 currentDropZonePosition = undefined;
                 currentTypeTransferred = undefined;
                 currentDataTransferred = undefined;
                 Element.classList.remove('hovered');
-                invokeHandler('onDroppableLeave', Options, currentDroppableEntity, Element);
+                invokeHandler('onDroppableLeave', Options, currentDroppableExtras, Options.Extras);
             } // swallow "dragleave" right after successful "drop"
             originalEvent.preventDefault();
             originalEvent.stopPropagation();
@@ -915,19 +904,17 @@ function asDropZone(Element, Options) {
         var TypesToAccept = Options.TypesToAccept;
         var offeredTypeList = originalEvent.dataTransfer.types.filter(function (Type) {
             return (Type in TypesToAccept) && ((wantedOperation == null) ||
-                (TypesToAccept[Type].indexOf(wantedOperation) >= 0)) && ((Type !== '#') ||
-                // @ts-ignore originalEvent.dataTransfer is definitely != null
-                (Type === '#') && (originalEvent.dataTransfer.getData('#') === localId));
+                (TypesToAccept[Type].indexOf(wantedOperation) >= 0));
         }); // cannot use "originalEvent.dataTransfer.dropEffect" due to browser bug
         if (offeredTypeList.length === 0) {
-            currentDropZoneEntity = undefined;
+            currentDropZoneExtras = undefined;
             currentDropZonePosition = undefined;
             DroppableWasDropped = false;
             currentDropOperation = undefined;
             currentTypeTransferred = undefined;
             currentDataTransferred = undefined;
             Element.classList.remove('hovered');
-            invokeHandler('onDroppableLeave', Options, currentDroppableEntity, Element);
+            invokeHandler('onDroppableLeave', Options, currentDroppableExtras, Options.Extras);
             return;
         }
         currentDropZonePosition = asPosition(e.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, Element)); // relative to DropZone element
@@ -935,10 +922,7 @@ function asDropZone(Element, Options) {
         offeredTypeList.forEach(
         // @ts-ignore originalEvent.dataTransfer definitely exists
         function (Type) { return offeredData[Type] = originalEvent.dataTransfer.getData(Type); });
-        if ('#' in offeredData) {
-            offeredData['#'] = null;
-        }
-        var acceptedType = ResultOfHandler('onDrop', Options, currentDroppableEntity, currentDropZonePosition.x, currentDropZonePosition.y, wantedOperation, offeredData, Element);
+        var acceptedType = ResultOfHandler('onDrop', Options, currentDropZonePosition.x, currentDropZonePosition.y, wantedOperation, offeredData, currentDroppableExtras, Options.Extras);
         switch (true) {
             case (acceptedType == null):
                 DroppableWasDropped = true;
@@ -954,20 +938,21 @@ function asDropZone(Element, Options) {
                 break;
             default: // handler should return false in case of failure
                 DroppableWasDropped = false;
-                currentDropZoneEntity = undefined;
+                currentDropZoneExtras = undefined;
                 currentDropZonePosition = undefined;
                 currentDropOperation = undefined;
                 currentTypeTransferred = undefined;
                 currentDataTransferred = undefined;
-            //        invokeHandler('onDroppableLeave', Options, currentDroppableEntity, Element)
+            //        invokeHandler('onDroppableLeave', Options, currentDroppableExtras, Options.Extras)
         }
+        currentDropZoneElement = undefined;
         Element.classList.remove('hovered');
     }
     /**** updateDropZoneOptions ****/
     function updateDropZoneOptions(Options) {
         Options = parsedDropZoneOptions(Options);
-        if (Options.Entity != null) {
-            currentDropZoneOptions.Entity = Options.Entity;
+        if (Options.Extras != null) {
+            currentDropZoneOptions.Extras = Options.Extras;
         }
         if (ObjectIsNotEmpty(Options.TypesToAccept)) {
             currentDropZoneOptions.TypesToAccept = Options.TypesToAccept;
