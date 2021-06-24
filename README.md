@@ -187,8 +187,8 @@ While being hovered by a droppable whose data offered is at least partially acce
 #### Drag-and-Drop ####
 
 * [standard drag-and-drop](https://svelte.dev/repl/8e0ec7bf90bf4ad889b48ff6029bf1f6) - demonstrates the sequence of callbacks for droppables and drop zones
-* [standard drop](https://svelte.dev/repl/097fdce459684421aa11d53cea4b48e7) - lods callbacks for actual drop operations only
-
+* [standard drop](https://svelte.dev/repl/097fdce459684421aa11d53cea4b48e7) - logs callbacks for actual drop operations only
+* [type-specific drop](https://svelte.dev/repl/64cdbfb322f84eac8aa150ba6470e948) - illustrates determination of droppability based on offered types
 
 ### Caveats ###
 
