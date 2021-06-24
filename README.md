@@ -180,6 +180,7 @@ While being hovered by a droppable whose data offered is at least partially acce
 * [draggable resizable Note](https://svelte.dev/repl/86663312b0034250943904ed537feff8) - adds a "resize" handle to the draggable note
 * [Line Node Dragging](https://svelte.dev/repl/3f5f997239c645029cb2afb6f33ae635) - lets drag the handles at the end of a straight line
 * [Polygon Node Dragging](https://svelte.dev/repl/ded27af54b2747559f2d2f239aa990e8) - lets drag the nodes of a polygon
+* [quadratic Bezier Curve Node Dragging](https://svelte.dev/repl/78c7766012894a33afbc665234c35f9b) - lets drag the control points of a quadratic bezier curve
 
 #### Drag-and-Drop ####
 
