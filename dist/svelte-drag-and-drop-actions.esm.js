@@ -471,7 +471,7 @@ function asDraggable(Element, Options) {
         if (originalEvent.dataTransfer != null) {
             originalEvent.dataTransfer.effectAllowed = 'none';
         }
-        Element.classList.add('dragged');
+        setTimeout(function () { return Element.classList.add('dragged'); }, 0);
         originalEvent.stopPropagation();
     }
     /**** continueDragging ****/
@@ -660,7 +660,7 @@ function asDroppable(Element, Options) {
         currentDropOperation = undefined;
         currentTypeTransferred = undefined;
         currentDataTransferred = undefined;
-        Element.classList.add('dragged');
+        setTimeout(function () { return Element.classList.add('dragged'); }, 0);
         originalEvent.stopPropagation();
     }
     /**** continueDragging ****/
