@@ -14,8 +14,6 @@
 
   import Conversion from 'svelte-coordinate-conversion'
 
-  const localId = Date.now() + '-' + Math.random()    // identifies this browser
-
 //-------------------------------------------------------------------------------
 //--             use:asDraggable={options} - "drag" without "drop"             --
 //-------------------------------------------------------------------------------
@@ -32,12 +30,13 @@
   ) | null | undefined
 
   type DraggableOptions = {
+    Extras?:any,
     relativeTo?:PositionReference,
     Dummy?:DragDummy, DummyOffsetX?:number, DummyOffsetY?:number,
     minX?:number, minY?:number, maxX?:number, maxY?:number,
-    onDragStart?:Position | ((Element?:HTMLElement | SVGElement) => Position),
-    onDragMove?: (x:number,y:number, dx:number,dy:number, Element?:HTMLElement | SVGElement) => void,
-    onDragEnd?:  (x:number,y:number, dx:number,dy:number, Element?:HTMLElement | SVGElement) => void,
+    onDragStart?:Position | ((DraggableExtras:any) => Position),
+    onDragMove?: (x:number,y:number, dx:number,dy:number, DraggableExtras:any) => void,
+    onDragEnd?:  (x:number,y:number, dx:number,dy:number, DraggableExtras:any) => void,
   }
 
 /**** parsedDraggableOptions ****/
@@ -45,10 +44,12 @@
   function parsedDraggableOptions (Options:any):DraggableOptions {
     Options = allowedPlainObject('drag options',Options) || {}
 
-    let relativeTo:PositionReference
+    let Extras:any, relativeTo:PositionReference
     let Dummy:DragDummy, DummyOffsetX:number, DummyOffsetY:number
     let minX:number, minY:number, maxX:number, maxY:number
     let onDragStart:Function, onDragMove:Function, onDragEnd:Function, onDragCancel:Function
+
+    Extras = Options.Extras
 
     switch (true) {
       case (Options.relativeTo == null):
@@ -103,7 +104,7 @@
     onDragEnd  = allowedFunction('"onDragEnd" handler',  Options.onDragEnd)
 
     return {
-      relativeTo, Dummy, DummyOffsetX,DummyOffsetY,
+      Extras, relativeTo, Dummy, DummyOffsetX,DummyOffsetY,
       minX,minY, maxX,maxY,
 // @ts-ignore
       onDragStart, onDragMove, onDragEnd, onDragCancel
@@ -142,7 +143,7 @@
         initialPosition = { x:0,y:0 }               // given in user coordinates
       } else {
         try {
-          let StartPosition = (Options.onDragStart as Function)(Element)
+          let StartPosition = (Options.onDragStart as Function)(Options.Extras)
           if (ValueIsPlainObject(StartPosition)) {
             let x = allowedFiniteNumber('x start position',StartPosition.x)
             let y = allowedFiniteNumber('y start position',StartPosition.y)
@@ -239,7 +240,7 @@
 
         lastPosition = { x,y }
 
-        invokeHandler('onDragMove', Options, x,y, dx,dy, Element)
+        invokeHandler('onDragMove', Options, x,y, dx,dy, Options.Extras)
       }
 
       originalEvent.stopPropagation()
@@ -259,7 +260,7 @@
         let dx = x - lastPosition.x
         let dy = y - lastPosition.y
 
-        invokeHandler('onDragEnd', Options, x,y, dx,dy, Element)
+        invokeHandler('onDragEnd', Options, x,y, dx,dy, Options.Extras)
       }
 
       Element.classList.remove('dragged')
@@ -300,8 +301,8 @@
 
 /**** extended Drag-and-Drop Support ****/
 
-  let currentDroppableEntity:any                  // currently dragged droppable
-  let currentDropZoneEntity:any                   // currently hovered drop zone
+  let currentDroppableExtras:any       // extras for currently dragged droppable
+  let currentDropZoneExtras:any        // extras for currently hovered drop zone
   let currentDropZoneElement:Element|undefined                // dto. as Element
 
   let DroppableWasDropped:boolean       // indicates a successful drop operation
@@ -320,15 +321,15 @@
   export type DataOfferSet = { [Type:string]:string }
 
   type DroppableOptions = DraggableOptions & {
-    Entity?:any,
+    Extras?:any,
     Operations?:string,// consisting of 'copy', 'move', 'link' (blank-separated)
     DataToOffer?:DataOfferSet,
-    onDropZoneEnter?: (DropZone:any, x:number,y:number, Element:HTMLElement | SVGElement) => void,
-    onDropZoneHover?: (DropZone:any, x:number,y:number, Element:HTMLElement | SVGElement) => void,
-    onDropZoneLeave?: (DropZone:any, Element:HTMLElement | SVGElement) => void,
-    onDropped?:       (DropZone:any, x:number,y:number, Operation:DropOperation,
+    onDropZoneEnter?: (x:number,y:number, DropZoneExtras:any, DroppableExtras:any) => void,
+    onDropZoneHover?: (x:number,y:number, DropZoneExtras:any, DroppableExtras:any) => void,
+    onDropZoneLeave?: (DropZoneExtras:any, DroppableExtras:any) => void,
+    onDropped?:       (x:number,y:number, Operation:DropOperation,
                         TypeTransferred:string, DataTransferred:any,
-                        Element:HTMLElement | SVGElement) => void,
+                        DropZoneExtras:any, DroppableExtras:any) => void,
   }
 
 /**** parsedDroppableOptions ****/
@@ -336,23 +337,14 @@
   function parsedDroppableOptions (Options:any):DroppableOptions {
     Options = allowedPlainObject('drop options',Options) || {}
 
-    let Entity:any, Operations:string, DataToOffer:DataOfferSet
+    let Operations:string, DataToOffer:DataOfferSet
     let onDropZoneEnter:Function, onDropZoneHover:Function, onDropZoneLeave:Function
     let onDropped:Function
-
-    Entity = Options.Entity
 
     Operations  = parsedOperations('list of allowed operations',Options.Operations,'copy')
     DataToOffer = Object.assign(
       {}, allowedPlainObject('data to be offered',Options.DataToOffer)
     )
-
-    if (
-      ('#' in DataToOffer) ||
-      ObjectIsEmpty(DataToOffer) && StringIsNotEmpty(Operations)
-    ) {
-      DataToOffer['#'] = localId          // for passing objects within this app
-    }
 
     onDropZoneEnter = allowedFunction('"onDropZoneEnter" handler',Options.onDropZoneEnter)
     onDropZoneHover = allowedFunction('"onDropZoneHover" handler',Options.onDropZoneHover)
@@ -360,7 +352,7 @@
     onDropped       = allowedFunction('"onDropped" handler',      Options.onDropped)
 
     return {
-      Entity, Operations, DataToOffer,
+      Operations, DataToOffer,
 // @ts-ignore
       onDropZoneEnter, onDropZoneHover, onDropZoneLeave, onDropped
     }
@@ -381,7 +373,8 @@
     let initialPosition:Position                    // given in user coordinates
     let lastPosition:   Position                                         // dto.
 
-    let lastDropZoneEntity:any
+    let lastDropZoneElement:HTMLElement|SVGElement|undefined
+    let lastDropZoneExtras:any
 
     currentDraggableOptions = parsedDraggableOptions(Options)
     currentDroppableOptions = parsedDroppableOptions(Options)
@@ -406,7 +399,7 @@
         initialPosition = { x:0,y:0 }               // given in user coordinates
       } else {
         try {
-          let StartPosition = (Options.onDragStart as Function)(Element)
+          let StartPosition = (Options.onDragStart as Function)(Options.Extras)
           if (ValueIsPlainObject(StartPosition)) {
             let x = allowedFiniteNumber('x start position',StartPosition.x)
             let y = allowedFiniteNumber('y start position',StartPosition.y)
@@ -424,8 +417,9 @@
         }
       }
 
-      lastPosition       = initialPosition
-      lastDropZoneEntity = undefined
+      lastPosition        = initialPosition
+      lastDropZoneElement = undefined
+      lastDropZoneExtras  = undefined
 
       PositioningWasDelayed = false                    // initializes workaround
 
@@ -482,9 +476,9 @@
         }
       }
 
-      currentDroppableEntity = Options.Entity
+      currentDroppableExtras = Options.Extras
 
-      currentDropZoneEntity   = undefined
+      currentDropZoneExtras   = undefined
       currentDropZonePosition = undefined
 
       DroppableWasDropped     = false
@@ -527,33 +521,32 @@
 
         lastPosition = { x,y }
 
-        if (Options.onDragMove != null) {
-          invokeHandler('onDragMove', Options, x,y, dx,dy, Element)
-        }
+        invokeHandler('onDragMove', Options, x,y, dx,dy, Options.Extras)
       }
 
-      if (currentDropZoneEntity === lastDropZoneEntity) {
-        if (currentDropZoneEntity != null) {
+      if (currentDropZoneElement === lastDropZoneElement) {
+        if (currentDropZoneElement != null) {
           invokeHandler(
-            'onDropZoneHover', Options, currentDropZoneEntity,
+            'onDropZoneHover', Options,
             (currentDropZonePosition as Position).x,(currentDropZonePosition as Position).y,
-            Element
+            currentDropZoneExtras, Options.Extras
           )
         }
       } else {
-        if (currentDropZoneEntity == null) {
+        if (currentDropZoneElement == null) {
           Element.classList.remove('droppable')
-          invokeHandler('onDropZoneLeave', Options, lastDropZoneEntity, Element)
+          invokeHandler('onDropZoneLeave', Options, lastDropZoneExtras, Options.Extras)
         } else {
           Element.classList.add('droppable')
           invokeHandler(
-            'onDropZoneEnter', Options, lastDropZoneEntity,
+            'onDropZoneEnter', Options,
             (currentDropZonePosition as Position).x,(currentDropZonePosition as Position).y,
-            Element
+            lastDropZoneExtras, Options.Extras
           )
         }
 
-        lastDropZoneEntity = currentDropZoneEntity
+        lastDropZoneElement = currentDropZoneElement as HTMLElement
+        lastDropZoneExtras  = currentDropZoneExtras
       }
 
       originalEvent.stopPropagation()
@@ -570,12 +563,13 @@
 
       if (DroppableWasDropped) {
         invokeHandler(
-          'onDropped', Options, currentDropZoneEntity,
+          'onDropped', Options,
           (currentDropZonePosition as Position).x,(currentDropZonePosition as Position).y,
-          currentDropOperation, currentTypeTransferred, currentDataTransferred, Element
+          currentDropOperation, currentTypeTransferred, currentDataTransferred,
+          currentDropZoneExtras, Options.Extras
         )
 
-        currentDropZoneEntity   = undefined
+        currentDropZoneExtras   = undefined
         currentDropZonePosition = undefined
 
         DroppableWasDropped     = false
@@ -591,10 +585,10 @@
         let dx = x - lastPosition.x
         let dy = y - lastPosition.y
 
-        invokeHandler('onDragEnd', Options, x,y, dx,dy)
+        invokeHandler('onDragEnd', Options, x,y, dx,dy, Options.Extras)
       }
 
-      currentDroppableEntity = undefined
+      currentDroppableExtras = undefined
 
       Element.classList.remove('dragged','droppable')
 
@@ -618,13 +612,15 @@
       currentDraggableOptions.onDragStart = (
         Options.onDragStart || currentDraggableOptions.onDragStart
       )           // may be used to update initial position for subsequent drags
-    }  /**** updateDroppableOptions ****/
+    }
+
+  /**** updateDroppableOptions ****/
 
     function updateDroppableOptions (Options:any):void {
       Options = parsedDroppableOptions(Options)
 
-      if (Options.Entity != null) {
-        currentDroppableOptions.Entity = Options.Entity
+      if (Options.Extras != null) {
+        currentDroppableOptions.Extras = Options.Extras
       }
     }
 
@@ -652,18 +648,17 @@
   export type TypeAcceptanceSet = { [Type:string]:string }
                    // values consist of 'copy', 'move', 'link' (blank-separated)
   type DropZoneOptions = {
-    Entity?:any,
+    Extras?:any,
     TypesToAccept?:TypeAcceptanceSet,
     HoldDelay?:number,
-    onDroppableEnter?:  (Droppable:any, x:number,y:number, Operation:DropOperation,
-                          offeredTypeList:string[], Element:HTMLElement | SVGElement) => boolean|undefined,
-    onDroppableMove?:   (Droppable:any, x:number,y:number, Operation:DropOperation,
-                          offeredTypeList:string[], Element:HTMLElement | SVGElement) => boolean|undefined,
-    onDroppableHold?:   (Droppable:any, x:number,y:number, Element:HTMLElement | SVGElement) => void,
-    onDroppableRelease?:(Droppable:any, x:number,y:number, Element:HTMLElement | SVGElement) => void,
-    onDroppableLeave?:  (Droppable:any, Element:HTMLElement | SVGElement) => void,
-    onDrop?:            (Droppable:any, x:number,y:number, Operation:DropOperation,
-                          DataOffered:any, Element:HTMLElement | SVGElement) => string,
+    onDroppableEnter?:(x:number,y:number, Operation:DropOperation, offeredTypeList:string[],
+                        DroppableExtras:any, DropZoneExtras:any) => boolean|undefined,
+    onDroppableMove?: (x:number,y:number, Operation:DropOperation, offeredTypeList:string[],
+                        DroppableExtras:any, DropZoneExtras:any) => boolean|undefined,
+    onDroppableHold?: (x:number,y:number, DroppableExtras:any, DropZoneExtras:any) => void,
+    onDroppableLeave?:(DroppableExtras:any, DropZoneExtras:any) => void,
+    onDrop?:          (x:number,y:number, Operation:DropOperation, DataOffered:any,
+                        DroppableExtras:any, DropZoneExtras:any) => string,
   }
 
 /**** parsedDropZoneOptions ****/
@@ -671,11 +666,11 @@
   function parsedDropZoneOptions (Options:any):DropZoneOptions {
     Options = allowedPlainObject('drop zone options',Options) || {}
 
-    let Entity:any, TypesToAccept:TypeAcceptanceSet, HoldDelay:number
+    let Extras:any, TypesToAccept:TypeAcceptanceSet, HoldDelay:number
     let onDroppableEnter:Function, onDroppableMove:Function, onDroppableLeave:Function
     let onDroppableHold:Function, onDroppableRelease:Function, onDrop:Function
 
-    Entity = Options.Entity
+    Extras = Options.Extras
 
     allowPlainObject('data types to be accepted',Options.TypesToAccept)
     TypesToAccept = Object.create(null)
@@ -697,7 +692,7 @@
     onDrop             = allowedFunction('"onDrop" handler',            Options.onDrop)
 
     return {
-      Entity, TypesToAccept, HoldDelay,
+      Extras, TypesToAccept, HoldDelay,
 // @ts-ignore
       onDroppableEnter, onDroppableMove, onDroppableLeave,
 // @ts-ignore
@@ -741,15 +736,15 @@
       ))                                         // relative to DropZone element
 
       let accepted:boolean|undefined = ResultOfHandler(
-        'onDroppableEnter', Options, currentDroppableEntity,
+        'onDroppableEnter', Options,
         DropZonePosition.x, DropZonePosition.y,
-        wantedOperation, offeredTypeList, Element
+        wantedOperation, offeredTypeList, currentDroppableExtras, Options.Extras
       )
 
       if (accepted === false) {
         return
       } else {
-        currentDropZoneEntity   = Options.Entity
+        currentDropZoneExtras   = Options.Extras
         currentDropZoneElement  = Element
         currentDropZonePosition = DropZonePosition
 
@@ -783,7 +778,7 @@
       ) // cannot use "originalEvent.dataTransfer.dropEffect" due to browser bug
       if (offeredTypeList.length === 0) {
         if (currentDropZoneElement === Element) {
-          currentDropZoneEntity   = undefined
+          currentDropZoneExtras   = undefined
           currentDropZoneElement  = undefined
           currentDropZonePosition = undefined
 
@@ -798,13 +793,13 @@
       ))                                         // relative to DropZone element
 
       let accepted = ResultOfHandler(
-        'onDroppableMove', Options, currentDroppableEntity,
+        'onDroppableMove', Options,
         currentDropZonePosition.x, currentDropZonePosition.y,
-        wantedOperation, offeredTypeList, Element
+        wantedOperation, offeredTypeList, currentDroppableExtras, Options.Extras
       )
 
       if (accepted === false) {
-        currentDropZoneEntity   = undefined
+        currentDropZoneExtras   = undefined
         currentDropZoneElement  = undefined
         currentDropZonePosition = undefined
 
@@ -822,7 +817,7 @@
 
       if (currentDropZoneElement === Element) {
         if (currentTypeTransferred == null) {
-          currentDropZoneEntity   = undefined
+          currentDropZoneExtras   = undefined
           currentDropZoneElement  = undefined
 
           DroppableWasDropped     = false
@@ -832,7 +827,7 @@
 
           Element.classList.remove('hovered')
 
-          invokeHandler('onDroppableLeave', Options, currentDroppableEntity, Element)
+          invokeHandler('onDroppableLeave', Options, currentDroppableExtras, Options.Extras)
         }                   // swallow "dragleave" right after successful "drop"
 
         originalEvent.preventDefault()
@@ -864,14 +859,10 @@
         (Type in TypesToAccept) && (
           (wantedOperation == null) ||
           (TypesToAccept[Type].indexOf(wantedOperation) >= 0)
-        ) && (
-          (Type !== '#') ||
-// @ts-ignore originalEvent.dataTransfer is definitely != null
-          (Type === '#') && (originalEvent.dataTransfer.getData('#') === localId)
         )
       ) // cannot use "originalEvent.dataTransfer.dropEffect" due to browser bug
       if (offeredTypeList.length === 0) {
-        currentDropZoneEntity   = undefined
+        currentDropZoneExtras   = undefined
         currentDropZonePosition = undefined
 
         DroppableWasDropped     = false
@@ -881,7 +872,7 @@
 
         Element.classList.remove('hovered')
 
-        invokeHandler('onDroppableLeave', Options, currentDroppableEntity, Element)
+        invokeHandler('onDroppableLeave', Options, currentDroppableExtras, Options.Extras)
 
         return
       }
@@ -895,11 +886,10 @@
 // @ts-ignore originalEvent.dataTransfer definitely exists
           (Type) => offeredData[Type] = originalEvent.dataTransfer.getData(Type)
         )
-        if ('#' in offeredData) { offeredData['#'] = null }
       let acceptedType = ResultOfHandler(
-        'onDrop', Options, currentDroppableEntity,
+        'onDrop', Options,
         currentDropZonePosition.x, currentDropZonePosition.y,
-        wantedOperation, offeredData, Element
+        wantedOperation, offeredData, currentDroppableExtras, Options.Extras
       )
 
       switch (true) {
@@ -917,14 +907,16 @@
           break
         default:               // handler should return false in case of failure
           DroppableWasDropped     = false
-          currentDropZoneEntity   = undefined
+          currentDropZoneExtras   = undefined
           currentDropZonePosition = undefined
           currentDropOperation    = undefined
           currentTypeTransferred  = undefined
           currentDataTransferred  = undefined
 
-//        invokeHandler('onDroppableLeave', Options, currentDroppableEntity, Element)
+//        invokeHandler('onDroppableLeave', Options, currentDroppableExtras, Options.Extras)
       }
+
+      currentDropZoneElement = undefined
 
       Element.classList.remove('hovered')
     }
@@ -934,8 +926,8 @@
     function updateDropZoneOptions (Options:any):void {
       Options = parsedDropZoneOptions(Options)
 
-      if (Options.Entity != null) {
-        currentDropZoneOptions.Entity = Options.Entity
+      if (Options.Extras != null) {
+        currentDropZoneOptions.Extras = Options.Extras
       }
 
       if (ObjectIsNotEmpty(Options.TypesToAccept)) {
