@@ -8,8 +8,8 @@
     ValueIsPlainObject, ValueIsOneOf,
     allowedFiniteNumber, allowedIntegerInRange, allowedString,
     allowPlainObject, allowedPlainObject,
-    allowListSatisfying, allowedFunction, allowedOneOf,
-    ObjectIsEmpty, ObjectIsNotEmpty, StringIsNotEmpty, quoted, constrained
+    allowListSatisfying, allowedFunction,
+    ObjectIsNotEmpty, quoted, constrained
   } from 'javascript-interface-library'
 
   import Conversion from 'svelte-coordinate-conversion'
@@ -106,7 +106,7 @@
     return {
       Extras, relativeTo, Dummy, DummyOffsetX,DummyOffsetY,
       minX,minY, maxX,maxY,
-// @ts-ignore
+// @ts-ignore we cannot validate given functions any further
       onDragStart, onDragMove, onDragEnd, onDragCancel
     }
   }
@@ -355,7 +355,7 @@
 
     return {
       Extras, Operations, DataToOffer,
-// @ts-ignore
+// @ts-ignore we cannot validate given functions any further
       onDropZoneEnter, onDropZoneHover, onDropZoneLeave, onDropped
     }
   }
@@ -692,9 +692,9 @@
 
     return {
       Extras, TypesToAccept, HoldDelay,
-// @ts-ignore
+// @ts-ignore we cannot validate given functions any further
       onDroppableEnter, onDroppableMove, onDroppableLeave,
-// @ts-ignore
+// @ts-ignore we cannot validate given functions any further
       onDroppableHold, onDroppableRelease, onDrop
     }
   }
