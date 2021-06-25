@@ -389,7 +389,7 @@ function parsedDraggableOptions(Options) {
         minY: minY,
         maxX: maxX,
         maxY: maxY,
-        // @ts-ignore
+        // @ts-ignore we cannot validate given functions any further
         onDragStart: onDragStart,
         onDragMove: onDragMove,
         onDragEnd: onDragEnd,
@@ -558,7 +558,7 @@ function parsedDroppableOptions(Options) {
         Extras: Extras,
         Operations: Operations,
         DataToOffer: DataToOffer,
-        // @ts-ignore
+        // @ts-ignore we cannot validate given functions any further
         onDropZoneEnter: onDropZoneEnter,
         onDropZoneHover: onDropZoneHover,
         onDropZoneLeave: onDropZoneLeave,
@@ -782,11 +782,11 @@ function parsedDropZoneOptions(Options) {
         Extras: Extras,
         TypesToAccept: TypesToAccept,
         HoldDelay: HoldDelay,
-        // @ts-ignore
+        // @ts-ignore we cannot validate given functions any further
         onDroppableEnter: onDroppableEnter,
         onDroppableMove: onDroppableMove,
         onDroppableLeave: onDroppableLeave,
-        // @ts-ignore
+        // @ts-ignore we cannot validate given functions any further
         onDroppableHold: onDroppableHold,
         onDroppableRelease: onDroppableRelease,
         onDrop: onDrop
