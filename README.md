@@ -62,6 +62,8 @@ Combined with a rather declarative API (designed with the most common use cases 
 
 If this sounds too abstract, just have a look into the examples: many of them illustrate specific use cases and may therefore serve as a basis for your own development.
 
+**Nota bene**: since it is based on native HTML5 drag-and-drop, `svelte-drag-and-drop-actions` principally also allows dragging and dropping between multiple windows (or tabs) of the same browser or even between browsers. To what extent this works, depends on the participating browsers, the data types involved (transferring text often works best), and may also depend on the operating system used. 
+
 ### Exported Types ###
 
 TypeScript programmers may import the following types in order to benefit from static type checking (JavaScript programmers may simply skip this section):
