@@ -814,8 +814,10 @@
 
         Element.classList.remove('hovered')
       } else {
-        originalEvent.preventDefault()
-        originalEvent.stopPropagation()
+        originalEvent.preventDefault()            // never allow default action!
+//      originalEvent.stopPropagation()
+
+        return false          // special return value when drop seems acceptable
       }
     }
 
@@ -853,7 +855,7 @@
         (currentDropZoneElement !== Element)
       ) { return }
 
-      originalEvent.preventDefault()              // never allow default action!
+//    originalEvent.preventDefault()
       originalEvent.stopPropagation()
 
       let Options = currentDropZoneOptions
