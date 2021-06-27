@@ -315,8 +315,8 @@
 //--               use:asDroppable={options} - "drag" and "drop"               --
 //-------------------------------------------------------------------------------
 
-  const DropOperations = [ 'copy', 'move', 'link' ]
-  export type DropOperation = typeof DropOperations[number]
+  export const DropOperations = [ 'copy', 'move', 'link' ]
+  export type  DropOperation  = typeof DropOperations[number]
 
   export type DataOfferSet = { [Type:string]:string }
 
