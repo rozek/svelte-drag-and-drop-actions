@@ -1095,5 +1095,5 @@ function invokeHandler(Name, Options) {
 }
 var ResultOfHandler = invokeHandler;
 
-export { asDraggable, asDropZone, asDroppable };
+export { DropOperations, asDraggable, asDropZone, asDroppable };
 //# sourceMappingURL=svelte-drag-and-drop-actions.esm.js.map

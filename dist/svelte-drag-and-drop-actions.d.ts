@@ -23,7 +23,7 @@ declare type DraggableOptions = {
 export declare function asDraggable(Element: HTMLElement | SVGElement, Options: DraggableOptions): {
     update: (Options: any) => void;
 };
-declare const DropOperations: string[];
+export declare const DropOperations: string[];
 export declare type DropOperation = typeof DropOperations[number];
 export declare type DataOfferSet = {
     [Type: string]: string;
