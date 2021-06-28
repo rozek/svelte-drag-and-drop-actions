@@ -5,7 +5,7 @@
   import {
     throwError,
     ValueIsFiniteNumber, ValueIsString, ValueIsNonEmptyString,
-    ValueIsPlainObject, ValueIsOneOf,
+    ValueIsFunction, ValueIsPlainObject, ValueIsOneOf,
     allowedFiniteNumber, allowedIntegerInRange, allowedString, allowedNonEmptyString,
     allowPlainObject, allowedPlainObject,
     allowListSatisfying, allowedFunction,
@@ -26,6 +26,7 @@
 
   export type DragDummy = (
     string | HTMLElement | SVGElement | // MathMLElement |
+    ((DraggableExtras:any) => HTMLElement | SVGElement) |
     'standard' | 'none'
   ) | null | undefined
 
@@ -79,6 +80,7 @@
       case (Options.Dummy instanceof HTMLElement):
       case (Options.Dummy instanceof SVGElement):
 //    case (Options.Dummy instanceof MathMLElement):
+      case ValueIsFunction(Options.Dummy):
         Dummy = Options.Dummy as DragDummy; break
       default: throwError(
         'InvalidArgument: invalid drag dummy specification given'
@@ -1104,6 +1106,24 @@
       case (Options.Dummy instanceof SVGElement):
 //    case (Options.Dummy instanceof MathMLElement):
         return Options.Dummy as Element
+      case ValueIsFunction(Options.Dummy):
+        let Candidate:HTMLElement | SVGElement | undefined = undefined
+        try {
+          Candidate = (Options.Dummy as Function)(Options.Extras)
+        } catch (Signal) {
+          console.error('RuntimeError: creating draggable dummy failed',Signal)
+        }
+
+        if (Candidate != null) {
+          if ((Candidate instanceof HTMLElement) || (Candidate instanceof SVGElement)) {
+            return Candidate
+          } else {
+            console.error(
+              'InvalidArgument: the newly created draggable dummy is ' +
+              'neither an HTML nor an SVG element'
+            )
+          }
+        }
     }
   }
 
