@@ -6,7 +6,7 @@
     throwError,
     ValueIsFiniteNumber, ValueIsString, ValueIsNonEmptyString,
     ValueIsPlainObject, ValueIsOneOf,
-    allowedFiniteNumber, allowedIntegerInRange, allowedString,
+    allowedFiniteNumber, allowedIntegerInRange, allowedString, allowedNonEmptyString,
     allowPlainObject, allowedPlainObject,
     allowListSatisfying, allowedFunction,
     ObjectIsNotEmpty, quoted, constrained
@@ -31,7 +31,7 @@
 
   type DraggableOptions = {
     Extras?:any,
-    relativeTo?:PositionReference,
+    relativeTo?:PositionReference, onlyFrom?:string, neverFrom?:string,
     Dummy?:DragDummy, DummyOffsetX?:number, DummyOffsetY?:number,
     minX?:number, minY?:number, maxX?:number, maxY?:number,
     onDragStart?:Position | ((DraggableExtras:any) => Position),
@@ -45,6 +45,7 @@
     Options = allowedPlainObject('drag options',Options) || {}
 
     let Extras:any, relativeTo:PositionReference
+    let onlyFrom:string|undefined, neverFrom:string|undefined
     let Dummy:DragDummy, DummyOffsetX:number, DummyOffsetY:number
     let minX:number, minY:number, maxX:number, maxY:number
     let onDragStart:Function, onDragMove:Function, onDragEnd:Function, onDragCancel:Function
@@ -65,6 +66,9 @@
         'InvalidArgument: invalid position reference given'
       )
     }
+
+    onlyFrom  = allowedNonEmptyString ('"onlyFrom" CSS selector',Options.onlyFrom)
+    neverFrom = allowedNonEmptyString('"neverFrom" CSS selector',Options.neverFrom)
 
     switch (true) {
       case (Options.Dummy == null):
@@ -104,7 +108,7 @@
     onDragEnd  = allowedFunction('"onDragEnd" handler',  Options.onDragEnd)
 
     return {
-      Extras, relativeTo, Dummy, DummyOffsetX,DummyOffsetY,
+      Extras, relativeTo, onlyFrom,neverFrom, Dummy, DummyOffsetX,DummyOffsetY,
       minX,minY, maxX,maxY,
 // @ts-ignore we cannot validate given functions any further
       onDragStart, onDragMove, onDragEnd, onDragCancel
@@ -116,6 +120,7 @@
   export function asDraggable (
     Element:HTMLElement|SVGElement, Options:DraggableOptions
   ) {
+    let isDragged:boolean
     let currentDraggableOptions:DraggableOptions
 
     let PositionReference:Element         // element with user coordinate system
@@ -125,12 +130,20 @@
     let initialPosition:Position                    // given in user coordinates
     let lastPosition:   Position                                         // dto.
 
+    isDragged = false
+
     currentDraggableOptions = parsedDraggableOptions(Options)
 
   /**** startDragging ****/
 
     function startDragging (originalEvent:DragEvent) {
       let Options = currentDraggableOptions
+
+      if (fromForbiddenElement(Element,Options,originalEvent)) {
+        originalEvent.stopPropagation()
+        originalEvent.preventDefault()
+        return false
+      }
 
       PositionReference = PositionReferenceFor(Element,Options)
 
@@ -207,6 +220,7 @@
         originalEvent.dataTransfer.effectAllowed = 'none'
       }
 
+      isDragged = true
       setTimeout(() => Element.classList.add('dragged'), 0)
 
       originalEvent.stopPropagation()
@@ -215,6 +229,8 @@
   /**** continueDragging ****/
 
     function continueDragging (originalEvent:DragEvent) {
+      if (! isDragged) { return false }
+
       let Options = currentDraggableOptions
 
       if (
@@ -249,6 +265,8 @@
   /**** finishDragging ****/
 
     function finishDragging (originalEvent:DragEvent) {
+      if (! isDragged) { return false }
+
 //    continueDragging(originalEvent)           // NO! positions might be wrong!
 
       let Options = currentDraggableOptions
@@ -297,6 +315,31 @@
     Element.addEventListener('dragend',   finishDragging)
 
     return { update:updateDraggableOptions }
+  }
+
+/**** fromForbiddenElement ****/
+
+  function fromForbiddenElement (
+    Element:HTMLElement|SVGElement, Options:DraggableOptions,
+    originalEvent:DragEvent
+  ):boolean {
+    if ((Options.onlyFrom != null) || (Options.neverFrom != null)) {
+      let touchedElement = document.elementFromPoint(
+        originalEvent.clientX,originalEvent.clientY
+      ) as Element
+
+      let fromElement = touchedElement.closest(Options.onlyFrom as string)
+      if ((Element !== fromElement) && ! Element.contains(fromElement)) {
+        return true
+      }
+
+      fromElement = touchedElement.closest(Options.neverFrom as string)
+      if ((Element === fromElement) || Element.contains(fromElement)) {
+        return true
+      }
+    }
+
+    return false
   }
 
 /**** extended Drag-and-Drop Support ****/
@@ -365,6 +408,7 @@
   export function asDroppable (
     Element:HTMLElement|SVGElement, Options:DroppableOptions
   ) {
+    let isDragged:boolean
     let currentDraggableOptions:DraggableOptions
     let currentDroppableOptions:DroppableOptions
 
@@ -378,6 +422,8 @@
     let lastDropZoneElement:HTMLElement|SVGElement|undefined
     let lastDropZoneExtras:any
 
+    isDragged = false
+
     currentDraggableOptions = parsedDraggableOptions(Options)
     currentDroppableOptions = parsedDroppableOptions(Options)
 
@@ -387,6 +433,12 @@
       let Options = Object.assign(
         {}, currentDraggableOptions, currentDroppableOptions
       )
+
+      if (fromForbiddenElement(Element,Options,originalEvent)) {
+        originalEvent.stopPropagation()
+        originalEvent.preventDefault()
+        return false
+      }
 
       PositionReference = PositionReferenceFor(Element,Options)
 
@@ -493,6 +545,8 @@
   /**** continueDragging ****/
 
     function continueDragging (originalEvent:DragEvent) {
+      if (! isDragged) { return false }
+
       let Options = Object.assign(
         {}, currentDraggableOptions, currentDroppableOptions
       )
@@ -554,6 +608,8 @@
   /**** finishDragging ****/
 
     function finishDragging (originalEvent:DragEvent) {
+      if (! isDragged) { return false }
+
 //    continueDragging(originalEvent)           // NO! positions might be wrong!
 
       let Options = Object.assign(
