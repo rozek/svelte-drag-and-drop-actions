@@ -4,7 +4,7 @@ a lightweight but flexible HTML5 Drag-and-Drop implemented as Svelte actions
 
 HTML5 Drag-and-Drop allows web applications to provide a visual user interface for transfering data between HTML elements or exchanging data with a browser's environment. Using HTML5 Drag-and-Drop for the *operation* of an application (i.e. the repositioning, resizing or reordering of elements) is difficult and suffers from some browser-specific bugs.
 
-Instead of fully re-implementing the visual operation of web applications with mouse and touch gestures (as done in [agnostic-draggable](https://github.com/rozek/agnostic-draggable) or [svelte-dnd-action](https://github.com/isaacHagoel/svelte-dnd-action)), `svelte-drag-and-drop-actions` builds upon already existing HTML5 Drag-and-Drop functionality and simply extends it. The result is a lightweight package with a surprisingly simple programming interface. (And because this module is tree-shakable, using the plain dragging functionality only - i.e., without support for dropping - will reduce the import size even further)
+Instead of fully re-implementing the visual operation of web applications with mouse and touch gestures (as done in [agnostic-draggable](https://github.com/rozek/agnostic-draggable)), `svelte-drag-and-drop-actions` builds upon already existing HTML5 Drag-and-Drop functionality and simply extends it. The result is a lightweight package with a surprisingly simple programming interface. (And because this module is tree-shakable, using the plain dragging functionality only - i.e., without support for dropping - will reduce the import size even further)
 
 **NPM users**: please consider the [Github README](https://github.com/rozek/javascript-interface-library/blob/main/README.md) for the latest description of this package (as updating the docs would otherwise always require a new NPM package version)
 
@@ -62,7 +62,7 @@ Combined with a rather declarative API (designed with the most common use cases 
 
 If this sounds too abstract, just have a look into the examples: many of them illustrate specific use cases and may therefore serve as a basis for your own development.
 
-**Nota bene**: since it is based on native HTML5 drag-and-drop, `svelte-drag-and-drop-actions` principally also allows dragging and dropping between multiple windows (or tabs) of the same browser or even between browsers. To what extent this works, depends on the participating browsers, the data types involved (transferring text often works best), and may also depend on the operating system used. 
+**Nota bene**: since it is based on native HTML5 drag-and-drop, `svelte-drag-and-drop-actions` principally also allows dragging and dropping between multiple windows (or tabs) of the same browser or even between browsers. To what extent this works, depends on the participating browsers, the data types involved (transferring text often works best), and may also depend on the operating system used.
 
 ### Exported Types ###
 
@@ -180,6 +180,7 @@ While being hovered by a droppable whose data offered is at least partially acce
 * [plain dragging within region](https://svelte.dev/repl/6e98523988f54335bf2e2307e79b4173) - restricts dragging to a given region
 * [plain dragging a custom dummy](https://svelte.dev/repl/801170099918424c998f689a3c6b2ddc) - drags a custom dummy made from HTML
 * [plain dragging an existing dummy](https://svelte.dev/repl/ee2a354b389049fa87da061ab7731c53) - drags a dummy built from an existing HTML element (which must be visible, however)
+* [plain dragging a handle](https://svelte.dev/repl/83e4a79911f243f0b618fd25eece9d39) - illustrates dragging from a given handle rather than the whole draggable
 * [draggable Button](https://svelte.dev/repl/ba1d1ce67c0b40439ea5e3015d6d36bf) - drags a button which remains clickable
 * [draggable Note](https://svelte.dev/repl/03727e9474614e678b23fdaa1cbf5003) - drags a "note", but only from its title bar
 * [draggable resizable Note](https://svelte.dev/repl/86663312b0034250943904ed537feff8) - adds a "resize" handle to the draggable note
