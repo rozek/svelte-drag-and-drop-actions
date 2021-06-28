@@ -352,7 +352,8 @@ function parsedDraggableOptions(Options) {
         case ValueIsNonEmptyString(Options.Dummy):
         case (Options.Dummy instanceof HTMLElement):
         case (Options.Dummy instanceof SVGElement):
-            //    case (Options.Dummy instanceof MathMLElement):
+        //    case (Options.Dummy instanceof MathMLElement):
+        case ValueIsFunction(Options.Dummy):
             Dummy = Options.Dummy;
             break;
         default: throwError('InvalidArgument: invalid drag dummy specification given');
@@ -1104,6 +1105,23 @@ function DragImageFor(Element, Options) {
         case (Options.Dummy instanceof SVGElement):
             //    case (Options.Dummy instanceof MathMLElement):
             return Options.Dummy;
+        case ValueIsFunction(Options.Dummy):
+            var Candidate = undefined;
+            try {
+                Candidate = Options.Dummy(Options.Extras);
+            }
+            catch (Signal) {
+                console.error('RuntimeError: creating draggable dummy failed', Signal);
+            }
+            if (Candidate != null) {
+                if ((Candidate instanceof HTMLElement) || (Candidate instanceof SVGElement)) {
+                    return Candidate;
+                }
+                else {
+                    console.error('InvalidArgument: the newly created draggable dummy is ' +
+                        'neither an HTML nor an SVG element');
+                }
+            }
     }
 }
 /**** parsedOperations ****/
