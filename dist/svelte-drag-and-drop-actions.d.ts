@@ -8,6 +8,8 @@ export declare type DragDummy = (string | HTMLElement | SVGElement | // MathMLEl
 declare type DraggableOptions = {
     Extras?: any;
     relativeTo?: PositionReference;
+    onlyFrom?: string;
+    neverFrom?: string;
     Dummy?: DragDummy;
     DummyOffsetX?: number;
     DummyOffsetY?: number;

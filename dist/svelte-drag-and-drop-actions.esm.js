@@ -206,6 +206,8 @@ function expectIntegerInRange(Description, Argument, minValue, maxValue) {
 var expectedIntegerInRange = expectIntegerInRange;
 /**** allow/expect[ed]String ****/
 var allowString = /*#__PURE__*/ ValidatorForClassifier(ValueIsString, acceptNil, 'literal string'), allowedString = allowString;
+/**** allow/expect[ed]NonEmptyString ****/
+var allowNonEmptyString = /*#__PURE__*/ ValidatorForClassifier(ValueIsNonEmptyString, acceptNil, 'non-empty literal string'), allowedNonEmptyString = allowNonEmptyString;
 /**** allow/expect[ed]Function ****/
 var allowFunction = /*#__PURE__*/ ValidatorForClassifier(ValueIsFunction, acceptNil, 'JavaScript function'), allowedFunction = allowFunction;
 var expectObject = /*#__PURE__*/ ValidatorForClassifier(ValueIsObject, rejectNil, 'JavaScript object');
@@ -320,6 +322,7 @@ var e={fromViewportTo:function(e,t,o){switch(!0){case null==t:throw new Error('n
 function parsedDraggableOptions(Options) {
     Options = allowedPlainObject('drag options', Options) || {};
     var Extras, relativeTo;
+    var onlyFrom, neverFrom;
     var Dummy, DummyOffsetX, DummyOffsetY;
     var minX, minY, maxX, maxY;
     var onDragStart, onDragMove, onDragEnd, onDragCancel;
@@ -338,6 +341,8 @@ function parsedDraggableOptions(Options) {
             break;
         default: throwError('InvalidArgument: invalid position reference given');
     }
+    onlyFrom = allowedNonEmptyString('"onlyFrom" CSS selector', Options.onlyFrom);
+    neverFrom = allowedNonEmptyString('"neverFrom" CSS selector', Options.neverFrom);
     switch (true) {
         case (Options.Dummy == null):
             Dummy = undefined;
@@ -382,6 +387,8 @@ function parsedDraggableOptions(Options) {
     return {
         Extras: Extras,
         relativeTo: relativeTo,
+        onlyFrom: onlyFrom,
+        neverFrom: neverFrom,
         Dummy: Dummy,
         DummyOffsetX: DummyOffsetX,
         DummyOffsetY: DummyOffsetY,
@@ -398,6 +405,7 @@ function parsedDraggableOptions(Options) {
 }
 /**** use:asDraggable={options} ****/
 function asDraggable(Element, Options) {
+    var isDragged;
     var currentDraggableOptions;
     var PositionReference; // element with user coordinate system
     var ReferenceDeltaX, ReferenceDeltaY; // mouse -> user coord.s
@@ -405,10 +413,16 @@ function asDraggable(Element, Options) {
     var DragImage;
     var initialPosition; // given in user coordinates
     var lastPosition; // dto.
+    isDragged = false;
     currentDraggableOptions = parsedDraggableOptions(Options);
     /**** startDragging ****/
     function startDragging(originalEvent) {
         var Options = currentDraggableOptions;
+        if (fromForbiddenElement(Element, Options, originalEvent)) {
+            originalEvent.stopPropagation();
+            originalEvent.preventDefault();
+            return false;
+        }
         PositionReference = PositionReferenceFor(Element, Options);
         var relativePosition = e.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, PositionReference); // relative to reference element
         ReferenceDeltaX = ReferenceDeltaY = 0;
@@ -471,11 +485,15 @@ function asDraggable(Element, Options) {
         if (originalEvent.dataTransfer != null) {
             originalEvent.dataTransfer.effectAllowed = 'none';
         }
+        isDragged = true;
         setTimeout(function () { return Element.classList.add('dragged'); }, 0);
         originalEvent.stopPropagation();
     }
     /**** continueDragging ****/
     function continueDragging(originalEvent) {
+        if (!isDragged) {
+            return false;
+        }
         var Options = currentDraggableOptions;
         if ((originalEvent.screenX === 0) && (originalEvent.screenY === 0) &&
             !PositioningWasDelayed) {
@@ -497,6 +515,9 @@ function asDraggable(Element, Options) {
     }
     /**** finishDragging ****/
     function finishDragging(originalEvent) {
+        if (!isDragged) {
+            return false;
+        }
         //    continueDragging(originalEvent)           // NO! positions might be wrong!
         var Options = currentDraggableOptions;
         if (Options.onDragEnd != null) {
@@ -527,6 +548,21 @@ function asDraggable(Element, Options) {
     // @ts-ignore we know that the passed event is a DragEvent
     Element.addEventListener('dragend', finishDragging);
     return { update: updateDraggableOptions };
+}
+/**** fromForbiddenElement ****/
+function fromForbiddenElement(Element, Options, originalEvent) {
+    if ((Options.onlyFrom != null) || (Options.neverFrom != null)) {
+        var touchedElement = document.elementFromPoint(originalEvent.clientX, originalEvent.clientY);
+        var fromElement = touchedElement.closest(Options.onlyFrom);
+        if ((Element !== fromElement) && !Element.contains(fromElement)) {
+            return true;
+        }
+        fromElement = touchedElement.closest(Options.neverFrom);
+        if ((Element === fromElement) || Element.contains(fromElement)) {
+            return true;
+        }
+    }
+    return false;
 }
 /**** extended Drag-and-Drop Support ****/
 var currentDroppableExtras; // extras for currently dragged droppable
@@ -567,6 +603,7 @@ function parsedDroppableOptions(Options) {
 }
 /**** use:asDroppable={options} ****/
 function asDroppable(Element, Options) {
+    var isDragged;
     var currentDraggableOptions;
     var currentDroppableOptions;
     var PositionReference; // element with user coordinate system
@@ -577,11 +614,17 @@ function asDroppable(Element, Options) {
     var lastPosition; // dto.
     var lastDropZoneElement;
     var lastDropZoneExtras;
+    isDragged = false;
     currentDraggableOptions = parsedDraggableOptions(Options);
     currentDroppableOptions = parsedDroppableOptions(Options);
     /**** startDragging ****/
     function startDragging(originalEvent) {
         var Options = Object.assign({}, currentDraggableOptions, currentDroppableOptions);
+        if (fromForbiddenElement(Element, Options, originalEvent)) {
+            originalEvent.stopPropagation();
+            originalEvent.preventDefault();
+            return false;
+        }
         PositionReference = PositionReferenceFor(Element, Options);
         var relativePosition = e.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, PositionReference); // relative to reference element
         ReferenceDeltaX = ReferenceDeltaY = 0;
@@ -666,6 +709,9 @@ function asDroppable(Element, Options) {
     }
     /**** continueDragging ****/
     function continueDragging(originalEvent) {
+        if (!isDragged) {
+            return false;
+        }
         var Options = Object.assign({}, currentDraggableOptions, currentDroppableOptions);
         if ((originalEvent.screenX === 0) && (originalEvent.screenY === 0) &&
             !PositioningWasDelayed) {
@@ -704,6 +750,9 @@ function asDroppable(Element, Options) {
     }
     /**** finishDragging ****/
     function finishDragging(originalEvent) {
+        if (!isDragged) {
+            return false;
+        }
         //    continueDragging(originalEvent)           // NO! positions might be wrong!
         var Options = Object.assign({}, currentDraggableOptions, currentDroppableOptions);
         if (DroppableWasDropped) {
