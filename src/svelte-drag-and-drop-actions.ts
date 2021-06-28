@@ -26,7 +26,7 @@
 
   export type DragDummy = (
     string | HTMLElement | SVGElement | // MathMLElement |
-    ((DraggableExtras:any) => HTMLElement | SVGElement) |
+    ((DraggableExtras:any, Element:HTMLElement|SVGElement) => HTMLElement|SVGElement) |
     'standard' | 'none'
   ) | null | undefined
 
@@ -1109,7 +1109,7 @@
       case ValueIsFunction(Options.Dummy):
         let Candidate:HTMLElement | SVGElement | undefined = undefined
         try {
-          Candidate = (Options.Dummy as Function)(Options.Extras)
+          Candidate = (Options.Dummy as Function)(Options.Extras, Element)
         } catch (Signal) {
           console.error('RuntimeError: creating draggable dummy failed',Signal)
         }
