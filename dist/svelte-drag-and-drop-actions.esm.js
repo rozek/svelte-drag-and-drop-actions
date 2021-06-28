@@ -1108,7 +1108,7 @@ function DragImageFor(Element, Options) {
         case ValueIsFunction(Options.Dummy):
             var Candidate = undefined;
             try {
-                Candidate = Options.Dummy(Options.Extras);
+                Candidate = Options.Dummy(Options.Extras, Element);
             }
             catch (Signal) {
                 console.error('RuntimeError: creating draggable dummy failed', Signal);

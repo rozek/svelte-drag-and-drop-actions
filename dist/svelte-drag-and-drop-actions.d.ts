@@ -4,7 +4,7 @@ export declare type Position = {
     y: number;
 };
 export declare type DragDummy = (string | HTMLElement | SVGElement | // MathMLElement |
-((DraggableExtras: any) => HTMLElement | SVGElement) | 'standard' | 'none') | null | undefined;
+((DraggableExtras: any, Element: HTMLElement | SVGElement) => HTMLElement | SVGElement) | 'standard' | 'none') | null | undefined;
 declare type DraggableOptions = {
     Extras?: any;
     relativeTo?: PositionReference;
