@@ -895,10 +895,11 @@ function asDropZone(Element, Options) {
     function hoveredByDroppable(originalEvent) {
         if ((originalEvent.dataTransfer == null) ||
             (originalEvent.dataTransfer.effectAllowed === 'none') ||
-            (currentDropZoneElement !== Element)) {
+            (currentDropZoneElement != null) && (currentDropZoneElement !== Element)) {
             Element.classList.remove('hovered');
             return;
         }
+        // in some browsers, it may be that (currentDropZone !== Element)!
         var Options = currentDropZoneOptions;
         var wantedOperation = originalEvent.dataTransfer.dropEffect;
         if (wantedOperation === 'none') { // workaround for browser bug
@@ -929,16 +930,20 @@ function asDropZone(Element, Options) {
         }
         currentDropZonePosition = asPosition(e.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, Element)); // relative to DropZone element
         var accepted = ResultOfHandler('onDroppableMove', Options, currentDropZonePosition.x, currentDropZonePosition.y, wantedOperation, offeredTypeList, currentDroppableExtras, Options.Extras);
-        if (accepted === false) {
+        if (accepted) { // warning: sometimes (currentDropZone !== Element)!
+            currentDropZoneExtras = Options.Extras;
+            currentDropZoneElement = Element;
+            //      currentDropZonePosition has already been set before
+            Element.classList.add('hovered');
+            originalEvent.preventDefault(); // never allow default action!
+            //      originalEvent.stopPropagation()
+            return false; // special return value when drop seems acceptable
+        }
+        else {
             currentDropZoneExtras = undefined;
             currentDropZoneElement = undefined;
             currentDropZonePosition = undefined;
             Element.classList.remove('hovered');
-        }
-        else {
-            originalEvent.preventDefault(); // never allow default action!
-            //      originalEvent.stopPropagation()
-            return false; // special return value when drop seems acceptable
         }
     }
     /**** leftByDroppable ****/
@@ -946,7 +951,7 @@ function asDropZone(Element, Options) {
         Element.classList.remove('hovered');
         var Options = currentDropZoneOptions;
         if (currentDropZoneElement === Element) {
-            if (currentTypeTransferred == null) {
+            if (currentTypeTransferred == null) { // see explanation below
                 currentDropZoneExtras = undefined;
                 currentDropZoneElement = undefined;
                 DroppableWasDropped = false;
