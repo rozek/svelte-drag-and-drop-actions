@@ -283,6 +283,7 @@
         invokeHandler('onDragEnd', Options, x,y, dx,dy, Options.Extras)
       }
 
+      isDragged = false
       Element.classList.remove('dragged')
 
       originalEvent.stopPropagation()
@@ -539,6 +540,7 @@
       currentTypeTransferred  = undefined
       currentDataTransferred  = undefined
 
+      isDragged = true
       setTimeout(() => Element.classList.add('dragged'), 0)
 
       originalEvent.stopPropagation()
@@ -647,6 +649,7 @@
 
       currentDroppableExtras = undefined
 
+      isDragged = false
       Element.classList.remove('dragged','droppable')
 
       originalEvent.stopPropagation()
@@ -824,7 +827,10 @@
         (originalEvent.dataTransfer == null) ||
         (originalEvent.dataTransfer.effectAllowed === 'none') ||
         (currentDropZoneElement !== Element)
-      ) { return }
+      ) {
+        Element.classList.remove('hovered')
+        return
+      }
 
       let Options = currentDropZoneOptions
 
@@ -848,10 +854,9 @@
           currentDropZoneExtras   = undefined
           currentDropZoneElement  = undefined
           currentDropZonePosition = undefined
-
-          Element.classList.remove('hovered')
         }
 
+        Element.classList.remove('hovered')
         return
       }
 
@@ -882,6 +887,8 @@
   /**** leftByDroppable ****/
 
     function leftByDroppable (originalEvent:DragEvent) {
+      Element.classList.remove('hovered')
+
       let Options = currentDropZoneOptions
 
       if (currentDropZoneElement === Element) {
@@ -894,8 +901,6 @@
           currentTypeTransferred  = undefined
           currentDataTransferred  = undefined
 
-          Element.classList.remove('hovered')
-
           invokeHandler('onDroppableLeave', Options, currentDroppableExtras, Options.Extras)
         }                   // swallow "dragleave" right after successful "drop"
 
@@ -907,6 +912,8 @@
   /**** droppedByDroppable ****/
 
     function droppedByDroppable (originalEvent:DragEvent) {
+      Element.classList.remove('hovered')
+
       if (
         (originalEvent.dataTransfer == null) ||
         (originalEvent.dataTransfer.effectAllowed === 'none') ||
@@ -943,8 +950,6 @@
         currentDropOperation    = undefined
         currentTypeTransferred  = undefined
         currentDataTransferred  = undefined
-
-        Element.classList.remove('hovered')
 
         invokeHandler('onDroppableLeave', Options, currentDroppableExtras, Options.Extras)
 
@@ -991,8 +996,6 @@
       }
 
       currentDropZoneElement = undefined
-
-      Element.classList.remove('hovered')
     }
 
   /**** updateDropZoneOptions ****/
