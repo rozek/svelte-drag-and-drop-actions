@@ -528,6 +528,7 @@ function asDraggable(Element, Options) {
             var dy = y - lastPosition.y;
             invokeHandler('onDragEnd', Options, x, y, dx, dy, Options.Extras);
         }
+        isDragged = false;
         Element.classList.remove('dragged');
         originalEvent.stopPropagation();
     }
@@ -705,6 +706,7 @@ function asDroppable(Element, Options) {
         currentDropOperation = undefined;
         currentTypeTransferred = undefined;
         currentDataTransferred = undefined;
+        isDragged = true;
         setTimeout(function () { return Element.classList.add('dragged'); }, 0);
         originalEvent.stopPropagation();
     }
@@ -773,6 +775,7 @@ function asDroppable(Element, Options) {
             invokeHandler('onDragEnd', Options, x, y, dx, dy, Options.Extras);
         }
         currentDroppableExtras = undefined;
+        isDragged = false;
         Element.classList.remove('dragged', 'droppable');
         originalEvent.stopPropagation();
     }
@@ -893,6 +896,7 @@ function asDropZone(Element, Options) {
         if ((originalEvent.dataTransfer == null) ||
             (originalEvent.dataTransfer.effectAllowed === 'none') ||
             (currentDropZoneElement !== Element)) {
+            Element.classList.remove('hovered');
             return;
         }
         var Options = currentDropZoneOptions;
@@ -919,8 +923,8 @@ function asDropZone(Element, Options) {
                 currentDropZoneExtras = undefined;
                 currentDropZoneElement = undefined;
                 currentDropZonePosition = undefined;
-                Element.classList.remove('hovered');
             }
+            Element.classList.remove('hovered');
             return;
         }
         currentDropZonePosition = asPosition(e.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, Element)); // relative to DropZone element
@@ -939,6 +943,7 @@ function asDropZone(Element, Options) {
     }
     /**** leftByDroppable ****/
     function leftByDroppable(originalEvent) {
+        Element.classList.remove('hovered');
         var Options = currentDropZoneOptions;
         if (currentDropZoneElement === Element) {
             if (currentTypeTransferred == null) {
@@ -948,7 +953,6 @@ function asDropZone(Element, Options) {
                 currentDropZonePosition = undefined;
                 currentTypeTransferred = undefined;
                 currentDataTransferred = undefined;
-                Element.classList.remove('hovered');
                 invokeHandler('onDroppableLeave', Options, currentDroppableExtras, Options.Extras);
             } // swallow "dragleave" right after successful "drop"
             originalEvent.preventDefault();
@@ -957,6 +961,7 @@ function asDropZone(Element, Options) {
     }
     /**** droppedByDroppable ****/
     function droppedByDroppable(originalEvent) {
+        Element.classList.remove('hovered');
         if ((originalEvent.dataTransfer == null) ||
             (originalEvent.dataTransfer.effectAllowed === 'none') ||
             (currentDropZoneElement !== Element)) {
@@ -989,7 +994,6 @@ function asDropZone(Element, Options) {
             currentDropOperation = undefined;
             currentTypeTransferred = undefined;
             currentDataTransferred = undefined;
-            Element.classList.remove('hovered');
             invokeHandler('onDroppableLeave', Options, currentDroppableExtras, Options.Extras);
             return;
         }
@@ -1022,7 +1026,6 @@ function asDropZone(Element, Options) {
             //        invokeHandler('onDroppableLeave', Options, currentDroppableExtras, Options.Extras)
         }
         currentDropZoneElement = undefined;
-        Element.classList.remove('hovered');
     }
     /**** updateDropZoneOptions ****/
     function updateDropZoneOptions(Options) {
