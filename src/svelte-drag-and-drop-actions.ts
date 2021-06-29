@@ -826,11 +826,13 @@
       if (
         (originalEvent.dataTransfer == null) ||
         (originalEvent.dataTransfer.effectAllowed === 'none') ||
-        (currentDropZoneElement !== Element)
+        (currentDropZoneElement != null) && (currentDropZoneElement !== Element)
       ) {
         Element.classList.remove('hovered')
         return
       }
+
+// in some browsers, it may be that (currentDropZone !== Element)!
 
       let Options = currentDropZoneOptions
 
@@ -870,17 +872,23 @@
         wantedOperation, offeredTypeList, currentDroppableExtras, Options.Extras
       )
 
-      if (accepted === false) {
+      if (accepted) {       // warning: sometimes (currentDropZone !== Element)!
+        currentDropZoneExtras   = Options.Extras
+        currentDropZoneElement  = Element
+//      currentDropZonePosition has already been set before
+
+        Element.classList.add('hovered')
+
+        originalEvent.preventDefault()            // never allow default action!
+//      originalEvent.stopPropagation()
+
+        return false          // special return value when drop seems acceptable
+      } else {
         currentDropZoneExtras   = undefined
         currentDropZoneElement  = undefined
         currentDropZonePosition = undefined
 
         Element.classList.remove('hovered')
-      } else {
-        originalEvent.preventDefault()            // never allow default action!
-//      originalEvent.stopPropagation()
-
-        return false          // special return value when drop seems acceptable
       }
     }
 
@@ -892,7 +900,7 @@
       let Options = currentDropZoneOptions
 
       if (currentDropZoneElement === Element) {
-        if (currentTypeTransferred == null) {
+        if (currentTypeTransferred == null) {           // see explanation below
           currentDropZoneExtras   = undefined
           currentDropZoneElement  = undefined
 
