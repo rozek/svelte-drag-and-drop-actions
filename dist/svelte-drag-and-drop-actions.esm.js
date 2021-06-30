@@ -318,7 +318,6 @@ function constrained(Value, Minimum, Maximum) {
 var e={fromViewportTo:function(e,t,o){switch(!0){case null==t:throw new Error('no "Position" given');case"number"!=typeof t.left&&!(t.left instanceof Number):case"number"!=typeof t.top&&!(t.top instanceof Number):throw new Error('invalid "Position" given')}switch(e){case null:case void 0:throw new Error("no coordinate system given");case"viewport":return {left:t.left,top:t.top};case"document":return {left:t.left+window.scrollX,top:t.top+window.scrollY};case"local":switch(!0){case null==o:throw new Error("no target element given");case o instanceof Element:var r=window.getComputedStyle(o),n=parseFloat(r.borderLeftWidth),i=parseFloat(r.borderTopWidth),l=o.getBoundingClientRect();return {left:t.left-l.left-n,top:t.top-l.top-i};default:throw new Error("invalid target element given")}default:throw new Error("invalid coordinate system given")}},fromDocumentTo:function(e,t,o){switch(!0){case null==t:throw new Error('no "Position" given');case"number"!=typeof t.left&&!(t.left instanceof Number):case"number"!=typeof t.top&&!(t.top instanceof Number):throw new Error('invalid "Position" given')}switch(e){case null:case void 0:throw new Error("no coordinate system given");case"viewport":return {left:t.left-window.scrollX,top:t.top-window.scrollY};case"document":return {left:t.left,top:t.top};case"local":switch(!0){case null==o:throw new Error("no target element given");case o instanceof Element:var r=window.getComputedStyle(o),n=parseFloat(r.borderLeftWidth),i=parseFloat(r.borderTopWidth),l=o.getBoundingClientRect();return {left:t.left+window.scrollX-l.left-n,top:t.top+window.scrollY-l.top-i};default:throw new Error("invalid target element given")}default:throw new Error("invalid coordinate system given")}},fromLocalTo:function(e,t,o){switch(!0){case null==t:throw new Error('no "Position" given');case"number"!=typeof t.left&&!(t.left instanceof Number):case"number"!=typeof t.top&&!(t.top instanceof Number):throw new Error('invalid "Position" given')}var r,n,i;switch(!0){case null==o:throw new Error("no source element given");case o instanceof Element:var l=window.getComputedStyle(o),a=parseFloat(l.borderLeftWidth),s=parseFloat(l.borderTopWidth);n=(r=o.getBoundingClientRect()).left+a,i=r.top+s;break;default:throw new Error("invalid source element given")}switch(e){case null:case void 0:throw new Error("no coordinate system given");case"viewport":return {left:t.left+n,top:t.top+i};case"document":return {left:t.left+n+window.scrollX,top:t.top+i+window.scrollY};case"local":return {left:t.left,top:t.top};default:throw new Error("invalid coordinate system given")}}};
 
 //----------------------------------------------------------------------------//
-console.log('>>>> svelte-drag-and-drop-actions');
 /**** parsedDraggableOptions ****/
 function parsedDraggableOptions(Options) {
     Options = allowedPlainObject('drag options', Options) || {};
@@ -701,7 +700,6 @@ function asDroppable(Element, Options) {
             }
         }
         currentDroppableExtras = Options.Extras;
-        console.log('startDragging', currentDroppableExtras);
         currentDropZoneExtras = undefined;
         currentDropZonePosition = undefined;
         DroppableWasDropped = false;
@@ -776,7 +774,6 @@ function asDroppable(Element, Options) {
             var dy = y - lastPosition.y;
             invokeHandler('onDragEnd', Options, x, y, dx, dy, Options.Extras);
         }
-        console.log('finishDragging', currentDroppableExtras);
         currentDroppableExtras = undefined;
         isDragged = false;
         Element.classList.remove('dragged', 'droppable');
@@ -854,7 +851,6 @@ function asDropZone(Element, Options) {
     currentDropZoneOptions = parsedDropZoneOptions(Options);
     /**** enteredByDroppable ****/
     function enteredByDroppable(originalEvent) {
-        console.log('enteredByDroppable', currentDroppableExtras);
         if ((originalEvent.dataTransfer == null) ||
             (originalEvent.dataTransfer.effectAllowed === 'none')) {
             return;
@@ -897,7 +893,6 @@ function asDropZone(Element, Options) {
     }
     /**** hoveredByDroppable ****/
     function hoveredByDroppable(originalEvent) {
-        console.log('hoveredByDroppable', currentDroppableExtras);
         if ((originalEvent.dataTransfer == null) ||
             (originalEvent.dataTransfer.effectAllowed === 'none') ||
             (currentDropZoneElement != null) && (currentDropZoneElement !== Element)) {
@@ -953,7 +948,6 @@ function asDropZone(Element, Options) {
     }
     /**** leftByDroppable ****/
     function leftByDroppable(originalEvent) {
-        console.log('leftByDroppable', currentDroppableExtras);
         Element.classList.remove('hovered');
         var Options = currentDropZoneOptions;
         if (currentDropZoneElement === Element) {
@@ -972,7 +966,6 @@ function asDropZone(Element, Options) {
     }
     /**** droppedByDroppable ****/
     function droppedByDroppable(originalEvent) {
-        console.log('droppedByDroppable', currentDroppableExtras);
         Element.classList.remove('hovered');
         if ((originalEvent.dataTransfer == null) ||
             (originalEvent.dataTransfer.effectAllowed === 'none') ||
