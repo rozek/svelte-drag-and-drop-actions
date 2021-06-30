@@ -180,21 +180,21 @@ While being hovered by a droppable whose data offered is at least partially acce
 
 * [standard dragging](https://svelte.dev/repl/da5c51729c974c8b950e8de4bdb7d1c5) - shows hardly more than HTML5 drag-and-drop, but proves that it still works
 * [plain dragging](https://svelte.dev/repl/e779dd6b998a4c0ba94e417dd2a66c16) - drags an object itself (not a "ghost" or "dummy")
-* [plain dragging with CSS class "dragged"](https://svelte.dev/repl/019d96b653b1418785c06e5cb3ad1d59) - demonstrates usage of CSS class "dragged" assigned to a Draggable during dragging
+* [dragging with CSS class "dragged"](https://svelte.dev/repl/019d96b653b1418785c06e5cb3ad1d59) - demonstrates usage of CSS class "dragged" assigned to a Draggable during dragging
 * [plain dragging within region](https://svelte.dev/repl/6e98523988f54335bf2e2307e79b4173) - restricts dragging to a given region
-* [plain dragging a custom dummy](https://svelte.dev/repl/801170099918424c998f689a3c6b2ddc) - drags a custom dummy made from HTML
-* [plain dragging an existing dummy](https://svelte.dev/repl/ee2a354b389049fa87da061ab7731c53) - drags a dummy built from an existing HTML element (which must be visible, however)
-* [plain dragging an ad-hoc dummy](https://svelte.dev/repl/65a48616a12f4cd18bca6fed83cb2088) - demonstrates how to dynamically create a drag image for a draggable
-* [plain dragging a handle](https://svelte.dev/repl/83e4a79911f243f0b618fd25eece9d39) - illustrates dragging from a given handle rather than the whole draggable
-* [draggable Button](https://svelte.dev/repl/ba1d1ce67c0b40439ea5e3015d6d36bf) - drags a button which remains clickable
-* [draggable Note](https://svelte.dev/repl/03727e9474614e678b23fdaa1cbf5003) - drags a "note", but only from its title bar
-* [draggable resizable Note](https://svelte.dev/repl/86663312b0034250943904ed537feff8) - adds a "resize" handle to the draggable note
-* [Line Node Dragging](https://svelte.dev/repl/3f5f997239c645029cb2afb6f33ae635) - lets drag the handles at the end of a straight line
-* [Polygon Node Dragging](https://svelte.dev/repl/ded27af54b2747559f2d2f239aa990e8) - lets drag the nodes of a polygon
-* [quadratic Bezier Curve Node Dragging](https://svelte.dev/repl/78c7766012894a33afbc665234c35f9b) - lets drag the control points of a quadratic bezier curve
-* [cubic Bezier Curve Node Dragging](https://svelte.dev/repl/e9c64887e2684146acdc16e9af13193e) - lets drag the control points of a cubic bezier curve
-* [Resize Handles](https://svelte.dev/repl/1a620cee8fe9402a8063efea8b164232) - demonstrates the "classical" positioning and shaping of a rectangular element using a selection frame and handles
-* [Resize Handles for Mouse, Pen and Touch Input](https://svelte.dev/repl/52e662d6220d447495be8cd8851322b9) - like above but with proper handle sizes for devices with mouse, pen or touch input
+* [dragging a custom dummy](https://svelte.dev/repl/801170099918424c998f689a3c6b2ddc) - drags a custom dummy made from HTML
+* [dragging an existing dummy](https://svelte.dev/repl/ee2a354b389049fa87da061ab7731c53) - drags a dummy built from an existing HTML element (which must be visible, however)
+* [dragging an ad-hoc dummy](https://svelte.dev/repl/65a48616a12f4cd18bca6fed83cb2088) - demonstrates how to dynamically create a drag image for a draggable
+* [plain dragging from a handle](https://svelte.dev/repl/83e4a79911f243f0b618fd25eece9d39) - illustrates dragging from a given handle rather than the whole draggable
+* [plain draggable Button](https://svelte.dev/repl/ba1d1ce67c0b40439ea5e3015d6d36bf) - drags a button which remains clickable
+* [plain draggable Note](https://svelte.dev/repl/03727e9474614e678b23fdaa1cbf5003) - drags a "note", but only from its title bar
+* [plain draggable resizable Note](https://svelte.dev/repl/86663312b0034250943904ed537feff8) - adds a "resize" handle to the draggable note
+* [plain Line Node Dragging](https://svelte.dev/repl/3f5f997239c645029cb2afb6f33ae635) - lets drag the handles at the end of a straight line
+* [plain Polygon Node Dragging](https://svelte.dev/repl/ded27af54b2747559f2d2f239aa990e8) - lets drag the nodes of a polygon
+* [plain quadratic Bezier Curve Node Dragging](https://svelte.dev/repl/78c7766012894a33afbc665234c35f9b) - lets drag the control points of a quadratic bezier curve
+* [plain cubic Bezier Curve Node Dragging](https://svelte.dev/repl/e9c64887e2684146acdc16e9af13193e) - lets drag the control points of a cubic bezier curve
+* [plain draggable Resize Handles](https://svelte.dev/repl/1a620cee8fe9402a8063efea8b164232) - demonstrates the "classical" positioning and shaping of a rectangular element using a selection frame and handles
+* [plain draggable Resize Handles for Mouse, Pen and Touch Input](https://svelte.dev/repl/52e662d6220d447495be8cd8851322b9) - like above but with proper handle sizes for devices with mouse, pen or touch input
 
 ### Drag-and-Drop ###
 
