@@ -204,6 +204,7 @@ While being hovered by a droppable whose data offered is at least partially acce
 * [type-specific drop](https://svelte.dev/repl/64cdbfb322f84eac8aa150ba6470e948) - illustrates determination of droppability based on offered types
 * [type-specific drop with CSS class "hovered"](https://svelte.dev/repl/b354d5e23d7a4b09ad50af5114561e6a) - demonstrates visual feedback of drop zones while hovered by a matching droppable based on CSS class "hovered"
 * [operation-specific drop](https://svelte.dev/repl/263f54e6cbad489a861517bedb848e3b) - would illustrate the determination of droppability based on offered operations, if browsers would properly implement HTML5 drag-and-drop (i.e., may work in some browsers and "fail" in others)
+* [drag-and-drop into Trashcan](https://svelte.dev/repl/601fe6818bdc48f487002c489024c0a8) - drag any "Waste" into the Trashcan
 
 
 
