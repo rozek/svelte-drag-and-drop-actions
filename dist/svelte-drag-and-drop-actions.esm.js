@@ -879,7 +879,7 @@ function asDropZone(Element, Options) {
         }
         var DropZonePosition = asPosition(e.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, Element)); // relative to DropZone element
         var accepted = ResultOfHandler('onDroppableEnter', Options, DropZonePosition.x, DropZonePosition.y, wantedOperation, offeredTypeList, currentDroppableExtras, Options.Extras);
-        if (accepted === false) {
+        if (accepted === false) { // i.e. explicit "false" result required
             return;
         }
         else {
@@ -930,7 +930,13 @@ function asDropZone(Element, Options) {
         }
         currentDropZonePosition = asPosition(e.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, Element)); // relative to DropZone element
         var accepted = ResultOfHandler('onDroppableMove', Options, currentDropZonePosition.x, currentDropZonePosition.y, wantedOperation, offeredTypeList, currentDroppableExtras, Options.Extras);
-        if (accepted) { // warning: sometimes (currentDropZone !== Element)!
+        if (accepted === false) { // i.e. explicit "false" result required
+            currentDropZoneExtras = undefined;
+            currentDropZoneElement = undefined;
+            currentDropZonePosition = undefined;
+            Element.classList.remove('hovered');
+        }
+        else { // warning: sometimes (currentDropZone !== Element)!
             currentDropZoneExtras = Options.Extras;
             currentDropZoneElement = Element;
             //      currentDropZonePosition has already been set before
@@ -938,12 +944,6 @@ function asDropZone(Element, Options) {
             originalEvent.preventDefault(); // never allow default action!
             //      originalEvent.stopPropagation()
             return false; // special return value when drop seems acceptable
-        }
-        else {
-            currentDropZoneExtras = undefined;
-            currentDropZoneElement = undefined;
-            currentDropZonePosition = undefined;
-            Element.classList.remove('hovered');
         }
     }
     /**** leftByDroppable ****/
