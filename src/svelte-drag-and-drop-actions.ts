@@ -806,7 +806,7 @@
         wantedOperation, offeredTypeList, currentDroppableExtras, Options.Extras
       )
 
-      if (accepted === false) {
+      if (accepted === false) {         // i.e. explicit "false" result required
         return
       } else {
         currentDropZoneExtras   = Options.Extras
@@ -872,7 +872,13 @@
         wantedOperation, offeredTypeList, currentDroppableExtras, Options.Extras
       )
 
-      if (accepted) {       // warning: sometimes (currentDropZone !== Element)!
+      if (accepted === false) {         // i.e. explicit "false" result required
+        currentDropZoneExtras   = undefined
+        currentDropZoneElement  = undefined
+        currentDropZonePosition = undefined
+
+        Element.classList.remove('hovered')
+      } else {              // warning: sometimes (currentDropZone !== Element)!
         currentDropZoneExtras   = Options.Extras
         currentDropZoneElement  = Element
 //      currentDropZonePosition has already been set before
@@ -883,12 +889,6 @@
 //      originalEvent.stopPropagation()
 
         return false          // special return value when drop seems acceptable
-      } else {
-        currentDropZoneExtras   = undefined
-        currentDropZoneElement  = undefined
-        currentDropZonePosition = undefined
-
-        Element.classList.remove('hovered')
       }
     }
 
