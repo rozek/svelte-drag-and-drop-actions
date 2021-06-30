@@ -10,13 +10,13 @@ Instead of fully re-implementing the visual operation of web applications with m
 
 **Mobile Developers**: since many mobile platforms lack support for native HTML5 drag-and-drop, you should consider importing [svelte-drag-drop-touch](https://github.com/rozek/svelte-drag-drop-touch) as a polyfill (a simple import of that package will suffice - there is no extra programming needed)
 
-### Installation ###
+## Installation ##
 
 ```
 npm install svelte-drag-and-drop-actions
 ```
 
-### Usage Example ###
+## Usage Example ##
 
 The following example illustrates plain dragging of a "Draggable" within the bounds of a given "Arena". Read on to understand how it is working.
 
@@ -52,7 +52,7 @@ The following example illustrates plain dragging of a "Draggable" within the bou
 
 Additional, more detailled examples can be found below.
 
-### Functional Principle ###
+## Functional Principle ##
 
 Svelte is a Framework for building *reactive* applications, i.e. it assumes, that there is some *application state* which is used to construct the application's user interface - and whenever any part of this state changes, the corresponding interface elements are updated accordingly.
 
@@ -64,7 +64,7 @@ If this sounds too abstract, just have a look into the examples: many of them il
 
 **Nota bene**: since it is based on native HTML5 drag-and-drop, `svelte-drag-and-drop-actions` principally also allows dragging and dropping between multiple windows (or tabs) of the same browser or even between browsers. To what extent this works, depends on the participating browsers, the data types involved (transferring text often works best), and may also depend on the operating system used.
 
-### Exported Types ###
+## Exported Types ##
 
 TypeScript programmers may import the following types in order to benefit from static type checking (JavaScript programmers may simply skip this section):
 
@@ -78,7 +78,7 @@ TypeScript programmers may import the following types in order to benefit from s
 * `type TypeAcceptanceSet = { [Type:string]:string }`<br>`TypeAcceptanceSet` instances are dictionaries listing the various data formats accepted by a drop zone and the permitted drop operations for every format. The keys into a `TypeAcceptanceSet` are the same as for the abovementioned `DataOfferSet`s
 * `type DropZoneOptions = {`<br>&nbsp; `Extras?:any, TypesToAccept?:TypeAcceptanceSet, HoldDelay?:number,`<br>&nbsp; `onDroppableEnter?:  (x:number,y:number, Operation:DropOperation,`<br>&nbsp; &nbsp; &nbsp; `offeredTypeList:string[], DroppableExtras:any, DropZoneExtras:any) => boolean|undefined,`<br>&nbsp; `onDroppableMove?:   (x:number,y:number, Operation:DropOperation,`<br>&nbsp; &nbsp; &nbsp; `offeredTypeList:string[], DroppableExtras:any, DropZoneExtras:any) => boolean|undefined,`<br>&nbsp; `onDroppableHold?:   (x:number,y:number, DroppableExtras:any, DropZoneExtras:any) => void,`<br>&nbsp; `onDroppableLeave?:  (DroppableExtras:any, DropZoneExtras:any) => void,`<br>&nbsp; `onDrop?:            (x:number,y:number, Operation:DropOperation,`<br>&nbsp; &nbsp; &nbsp; `DataOffered:any, DroppableExtras:any, DropZoneExtras:any) => string`<br>`}`<br>a `DropZoneOptions` instance holds all options for a drop target (see below for details)
 
-### use:asDraggable ###
+## use:asDraggable ##
 
 `use:asDraggable` should be used for elements which will only be dragged around (but never dropped onto another element). Many use cases (from draggable windows over draggable nodes of graphical shapes to the resize handles found in many visual designers) only need this kind of behaviour.
 
@@ -109,7 +109,7 @@ While being dragged, the CSS class `dragged` is assigned to the draggable elemen
 
 `use:asDraggable` may, however, be combined with `use:asDropZone` in order to implement draggable drop zones.
 
-### use:asDroppable ###
+## use:asDroppable ##
 
 `use:asDroppable` is an extension of `use:asDraggable` and should be used for elements which will not only be dragged around but also dropped onto another element. Because of the underlying HTML5 drag-and-drop, dropping an element onto another one may lead to an exchange of data - but `svelte-drag-and-drop-actions` extends that functionality (for elements within the same application) and gives the programmer full control over what a "drop" will trigger (you could even delegate the actual action to take after dropping to the droppable, which sometimes turns out to be easier than the "classical" approach where the drop target is responsible)
 
@@ -151,7 +151,7 @@ While over a drop zone which accepts (some of) the data offered, the CSS class `
 
 `use:asDroppable` may, however, be combined with `use:asDropZone` in order to implement draggable drop zones which may itself be dropped over other drop zones.
 
-### use:asDropZone ###
+## use:asDropZone ##
 
 `use:asDropZone` marks an element as a "drop zone" which allows "droppable" elements to be dropped onto it in order to trigger an operation.
 
@@ -174,7 +174,7 @@ While being hovered by a droppable whose data offered is at least partially acce
 
 `use:asDropZone` may be combined with either `use:asDraggable` or `use:asDroppable` (not both together) in order to implement draggable drop zones which may perhaps itself be dropped over other drop zones.
 
-### Examples ###
+## Examples ##
 
 ### Dragging only ###
 
@@ -208,7 +208,7 @@ While being hovered by a droppable whose data offered is at least partially acce
 
 
 
-### Caveats ###
+## Caveats ##
 
 Simply extending already existing native HTML5 drag-and-drop functionality has a lot of advantages - but also some disadvantages, as there are:
 
@@ -216,7 +216,7 @@ Simply extending already existing native HTML5 drag-and-drop functionality has a
 * a custom drag image must either be an image object or a visible(!) element within the document from which a snapshot is taken
 * the configured drag image can not be changed during dragging as it is constructed when dragging starts and never updated again
 
-### Build Instructions ###
+## Build Instructions ##
 
 You may easily build this package yourself.
 
