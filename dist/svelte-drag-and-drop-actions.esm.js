@@ -554,17 +554,45 @@ function asDraggable(Element, Options) {
 /**** fromForbiddenElement ****/
 function fromForbiddenElement(Element, Options, originalEvent) {
     if ((Options.onlyFrom != null) || (Options.neverFrom != null)) {
-        var touchedElement = document.elementFromPoint(originalEvent.clientX, originalEvent.clientY);
-        var fromElement = touchedElement.closest(Options.onlyFrom);
-        if ((Element !== fromElement) && !Element.contains(fromElement)) {
-            return true;
+        var x = originalEvent.clientX;
+        var y = originalEvent.clientY;
+        var touchedElement = document.elementFromPoint(x, y);
+        //    elementFromPoint considers elements with "pointer-events" <> "none" only
+        //    but sometimes, "pointer-events:none" is needed for proper operation
+        touchedElement = innerElementOf(touchedElement, x, y);
+        if (Options.onlyFrom != null) {
+            var fromElement = touchedElement.closest(Options.onlyFrom);
+            if ((Element !== fromElement) && !Element.contains(fromElement)) {
+                return true;
+            }
         }
-        fromElement = touchedElement.closest(Options.neverFrom);
-        if ((Element === fromElement) || Element.contains(fromElement)) {
-            return true;
+        if (Options.neverFrom != null) {
+            var fromElement = touchedElement.closest(Options.neverFrom);
+            if ((Element === fromElement) || Element.contains(fromElement)) {
+                return true;
+            }
         }
     }
     return false;
+}
+/**** innerElementOf ****/
+function innerElementOf(Candidate, x, y) {
+    var innerElements = Candidate.children;
+    for (var i = 0, l = innerElements.length; i < l; i++) {
+        var innerElement = innerElements[i];
+        var Position = e.fromLocalTo('viewport', { left: 0, top: 0 }, innerElement);
+        if ((x < Position.left) || (y < Position.top)) {
+            continue;
+        }
+        if (x > Position.left + innerElement.offsetWidth - 1) {
+            continue;
+        }
+        if (y > Position.top + innerElement.offsetHeight - 1) {
+            continue;
+        }
+        return innerElementOf(innerElement, x, y);
+    }
+    return Candidate; // this is the innermost element at (x,y)
 }
 /**** extended Drag-and-Drop Support ****/
 var currentDroppableExtras; // extras for currently dragged droppable

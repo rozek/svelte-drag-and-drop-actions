@@ -54,7 +54,7 @@ declare type DropZoneOptions = {
     onDroppableMove?: (x: number, y: number, Operation: DropOperation, offeredTypeList: string[], DroppableExtras: any, DropZoneExtras: any) => boolean | undefined;
     onDroppableHold?: (x: number, y: number, DroppableExtras: any, DropZoneExtras: any) => void;
     onDroppableLeave?: (DroppableExtras: any, DropZoneExtras: any) => void;
-    onDrop?: (x: number, y: number, Operation: DropOperation, DataOffered: any, DroppableExtras: any, DropZoneExtras: any) => string;
+    onDrop?: (x: number, y: number, Operation: DropOperation, DataOffered: any, DroppableExtras: any, DropZoneExtras: any) => string | undefined;
 };
 /**** use:asDropZone={options} ****/
 export declare function asDropZone(Element: HTMLElement | SVGElement, Options: DropZoneOptions): {
