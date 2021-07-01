@@ -8,7 +8,7 @@ Instead of fully re-implementing the visual operation of web applications with m
 
 A first Svelte component based on `svelte-drag-and-drop-actions` is the [svelte-sortable-flat-list-view](https://github.com/rozek/svelte-sortable-flat-list-view).
 
-**NPM users**: please consider the [Github README](https://github.com/rozek/javascript-interface-library/blob/main/README.md) for the latest description of this package (as updating the docs would otherwise always require a new NPM package version)
+**NPM users**: please consider the [Github README](https://github.com/rozek/svelte-drag-and-drop-actions/blob/main/README.md) for the latest description of this package (as updating the docs would otherwise always require a new NPM package version)
 
 **Mobile Developers**: since many mobile platforms lack support for native HTML5 drag-and-drop, you should consider importing [svelte-drag-drop-touch](https://github.com/rozek/svelte-drag-drop-touch) as a polyfill (a simple import of that package will suffice - there is no extra programming needed)
 
