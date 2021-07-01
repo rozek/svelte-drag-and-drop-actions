@@ -22,7 +22,7 @@ The following example illustrates plain dragging of a "Draggable" within the bou
 
 Please note: **it is important to import the package within a module context**!
 Some applications may still work properly even if imported differently, but
-in general, this causes bugs which are difficult to isolate.
+in general, it may then no longer be possible to drag items into drop zones working with a different package import.
 
 ```
 <script context="module">
