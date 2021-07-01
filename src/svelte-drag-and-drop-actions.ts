@@ -398,7 +398,6 @@
   export type DataOfferSet = { [Type:string]:string }
 
   type DroppableOptions = DraggableOptions & {
-    Extras?:any,
     Operations?:string,// consisting of 'copy', 'move', 'link' (blank-separated)
     DataToOffer?:DataOfferSet,
     onDropZoneEnter?: (x:number,y:number, DropZoneExtras:any, DroppableExtras:any) => void,
@@ -414,11 +413,9 @@
   function parsedDroppableOptions (Options:any):DroppableOptions {
     Options = allowedPlainObject('drop options',Options) || {}
 
-    let Extras:any, Operations:string, DataToOffer:DataOfferSet
+    let Operations:string, DataToOffer:DataOfferSet
     let onDropZoneEnter:Function, onDropZoneHover:Function, onDropZoneLeave:Function
     let onDropped:Function
-
-    Extras = Options.Extras
 
     Operations  = parsedOperations('list of allowed operations',Options.Operations,'copy')
     DataToOffer = Object.assign(
@@ -431,7 +428,7 @@
     onDropped       = allowedFunction('"onDropped" handler',      Options.onDropped)
 
     return {
-      Extras, Operations, DataToOffer,
+      Operations, DataToOffer,
 // @ts-ignore we cannot validate given functions any further
       onDropZoneEnter, onDropZoneHover, onDropZoneLeave, onDropped
     }
@@ -710,9 +707,8 @@
     function updateDroppableOptions (Options:any):void {
       Options = parsedDroppableOptions(Options)
 
-      if (Options.Extras != null) {
-        currentDroppableOptions.Extras = Options.Extras
-      }
+      currentDroppableOptions.Operations  = Options.Operations
+      currentDroppableOptions.DataToOffer = Options.DataToOffer
     }
 
     Element.setAttribute('draggable','true')
