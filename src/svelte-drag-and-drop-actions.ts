@@ -327,22 +327,53 @@
     originalEvent:DragEvent
   ):boolean {
     if ((Options.onlyFrom != null) || (Options.neverFrom != null)) {
-      let touchedElement = document.elementFromPoint(
-        originalEvent.clientX,originalEvent.clientY
-      ) as Element
+      let x = originalEvent.clientX
+      let y = originalEvent.clientY
 
-      let fromElement = touchedElement.closest(Options.onlyFrom as string)
-      if ((Element !== fromElement) && ! Element.contains(fromElement)) {
-        return true
+      let touchedElement = document.elementFromPoint(x,y) as HTMLElement
+
+//    elementFromPoint considers elements with "pointer-events" <> "none" only
+//    but sometimes, "pointer-events:none" is needed for proper operation
+
+      touchedElement = innerElementOf(touchedElement, x,y)
+
+      if (Options.onlyFrom != null) {
+        let fromElement = touchedElement.closest(Options.onlyFrom as string)
+        if ((Element !== fromElement) && ! Element.contains(fromElement)) {
+          return true
+        }
       }
 
-      fromElement = touchedElement.closest(Options.neverFrom as string)
-      if ((Element === fromElement) || Element.contains(fromElement)) {
-        return true
+      if (Options.neverFrom != null) {
+        let fromElement = touchedElement.closest(Options.neverFrom as string)
+        if ((Element === fromElement) || Element.contains(fromElement)) {
+          return true
+        }
       }
     }
 
     return false
+  }
+
+/**** innerElementOf ****/
+
+  function innerElementOf (Candidate:HTMLElement, x:number,y:number):HTMLElement {
+    let innerElements = Candidate.children
+    for (let i = 0, l = innerElements.length; i < l; i++) {
+      let innerElement = innerElements[i] as HTMLElement
+
+      let Position = Conversion.fromLocalTo(
+        'viewport', { left:0, top:0 }, innerElement
+      )
+      if ((x < Position.left) || (y < Position.top)) { continue }
+
+      if (x > Position.left+innerElement.offsetWidth-1) { continue }
+      if (y > Position.top+innerElement.offsetHeight-1) { continue }
+
+      return innerElementOf(innerElement, x,y)
+    }
+
+    return Candidate               // this is the innermost element at (x,y)
   }
 
 /**** extended Drag-and-Drop Support ****/
@@ -718,7 +749,7 @@
     onDroppableHold?: (x:number,y:number, DroppableExtras:any, DropZoneExtras:any) => void,
     onDroppableLeave?:(DroppableExtras:any, DropZoneExtras:any) => void,
     onDrop?:          (x:number,y:number, Operation:DropOperation, DataOffered:any,
-                        DroppableExtras:any, DropZoneExtras:any) => string,
+                        DroppableExtras:any, DropZoneExtras:any) => string | undefined,
   }
 
 /**** parsedDropZoneOptions ****/
