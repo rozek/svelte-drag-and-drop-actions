@@ -31,7 +31,6 @@ export declare type DataOfferSet = {
     [Type: string]: string;
 };
 declare type DroppableOptions = DraggableOptions & {
-    Extras?: any;
     Operations?: string;
     DataToOffer?: DataOfferSet;
     onDropZoneEnter?: (x: number, y: number, DropZoneExtras: any, DroppableExtras: any) => void;

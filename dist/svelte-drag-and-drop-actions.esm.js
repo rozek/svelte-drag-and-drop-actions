@@ -610,10 +610,9 @@ var DropOperations = ['copy', 'move', 'link'];
 /**** parsedDroppableOptions ****/
 function parsedDroppableOptions(Options) {
     Options = allowedPlainObject('drop options', Options) || {};
-    var Extras, Operations, DataToOffer;
+    var Operations, DataToOffer;
     var onDropZoneEnter, onDropZoneHover, onDropZoneLeave;
     var onDropped;
-    Extras = Options.Extras;
     Operations = parsedOperations('list of allowed operations', Options.Operations, 'copy');
     DataToOffer = Object.assign({}, allowedPlainObject('data to be offered', Options.DataToOffer));
     onDropZoneEnter = allowedFunction('"onDropZoneEnter" handler', Options.onDropZoneEnter);
@@ -621,7 +620,6 @@ function parsedDroppableOptions(Options) {
     onDropZoneLeave = allowedFunction('"onDropZoneLeave" handler', Options.onDropZoneLeave);
     onDropped = allowedFunction('"onDropped" handler', Options.onDropped);
     return {
-        Extras: Extras,
         Operations: Operations,
         DataToOffer: DataToOffer,
         // @ts-ignore we cannot validate given functions any further
@@ -820,9 +818,8 @@ function asDroppable(Element, Options) {
     /**** updateDroppableOptions ****/
     function updateDroppableOptions(Options) {
         Options = parsedDroppableOptions(Options);
-        if (Options.Extras != null) {
-            currentDroppableOptions.Extras = Options.Extras;
-        }
+        currentDroppableOptions.Operations = Options.Operations;
+        currentDroppableOptions.DataToOffer = Options.DataToOffer;
     }
     Element.setAttribute('draggable', 'true');
     // @ts-ignore we know that the passed event is a DragEvent
