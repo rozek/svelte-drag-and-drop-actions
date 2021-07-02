@@ -294,7 +294,7 @@
     function updateDraggableOptions (Options:any):void {
       Options = parsedDraggableOptions(Options)
 
-      currentDraggableOptions.Extras = Options.Extras
+//    currentDraggableOptions.Extras = Options.Extras // Extras are kept constant
 
       currentDraggableOptions.Dummy = (
         Options.Dummy || currentDraggableOptions.Dummy
@@ -690,7 +690,7 @@
     function updateDraggableOptions (Options:any):void {
       Options = parsedDraggableOptions(Options)
 
-      currentDraggableOptions.Extras = Options.Extras
+//    currentDraggableOptions.Extras = Options.Extras // Extras are kept constant
 
       currentDraggableOptions.Dummy = (
         Options.Dummy || currentDraggableOptions.Dummy
