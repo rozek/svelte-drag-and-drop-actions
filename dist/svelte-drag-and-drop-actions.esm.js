@@ -535,7 +535,7 @@ function asDraggable(Element, Options) {
     /**** updateDraggableOptions ****/
     function updateDraggableOptions(Options) {
         Options = parsedDraggableOptions(Options);
-        currentDraggableOptions.Extras = Options.Extras;
+        //    currentDraggableOptions.Extras = Options.Extras // Extras are kept constant
         currentDraggableOptions.Dummy = (Options.Dummy || currentDraggableOptions.Dummy);
         currentDraggableOptions.minX = Options.minX;
         currentDraggableOptions.minY = Options.minY;
@@ -809,7 +809,7 @@ function asDroppable(Element, Options) {
     /**** updateDraggableOptions ****/
     function updateDraggableOptions(Options) {
         Options = parsedDraggableOptions(Options);
-        currentDraggableOptions.Extras = Options.Extras;
+        //    currentDraggableOptions.Extras = Options.Extras // Extras are kept constant
         currentDraggableOptions.Dummy = (Options.Dummy || currentDraggableOptions.Dummy);
         currentDraggableOptions.minX = Options.minX;
         currentDraggableOptions.minY = Options.minY;
