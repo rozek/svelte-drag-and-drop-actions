@@ -2,10 +2,10 @@
   "name": "svelte-drag-and-drop-actions",
   "version": "0.1.19",
   "description": "HTML5 Drag-and-Drop implemented as Svelte actions",
-  "svelte": "./dist/svelte-drag-and-drop-actions.esm.js",
+  "svelte": "./dist/svelte-drag-and-drop-actions.js",
   "types": "./dist/svelte-drag-and-drop-actions.d.ts",
   "scripts": {
-    "build": "rimraf dist && tsc && rollup -c rollup.config.js && mv src/*.d.ts dist && rm src/*.js",
+    "build": "rimraf dist && tsc && rollup -c rollup.config.js && mv src/*.d.ts dist && mv src/*.js dist",
     "agadoo": "agadoo",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
