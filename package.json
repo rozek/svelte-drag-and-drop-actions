@@ -1,6 +1,6 @@
 {
   "name": "svelte-drag-and-drop-actions",
-  "version": "0.1.20",
+  "version": "0.1.21",
   "description": "HTML5 Drag-and-Drop implemented as Svelte actions",
   "module": "./dist/svelte-drag-and-drop-actions.esm.js",
   "svelte": "./dist/svelte-drag-and-drop-actions.svelte.js",
