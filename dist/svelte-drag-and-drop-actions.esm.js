@@ -1,321 +1,5 @@
-//----------------------------------------------------------------------------//
-// see https://stackoverflow.com/questions/3277182/how-to-get-the-global-object-in-javascript
-//------------------------------------------------------------------------------
-//--                             Object Functions                             --
-//------------------------------------------------------------------------------
-// allow methods from Object.prototype to be applied to "vanilla" objects
-/**** Object_hasOwnProperty ****/
-function Object_hasOwnProperty(Value, PropertyName) {
-    return ((Value == null) || // let this method crash like its original
-        ('hasOwnProperty' in Value) && (typeof Value.hasOwnProperty === 'function')
-        ? Value.hasOwnProperty(PropertyName)
-        : Object.prototype.hasOwnProperty.call(Value, PropertyName));
-}
-/**** throwError - simplifies construction of named errors ****/
-function throwError(Message) {
-    var Match = /^([$a-zA-Z][$a-zA-Z0-9]*):\s*(\S.+)\s*$/.exec(Message);
-    if (Match == null) {
-        throw new Error(Message);
-    }
-    else {
-        var namedError = new Error(Match[2]);
-        namedError.name = Match[1];
-        throw namedError;
-    }
-}
-/**** ValueIsFiniteNumber (pure "isFinite" breaks on objects) ****/
-function ValueIsFiniteNumber(Value) {
-    return ((typeof Value === 'number') || (Value instanceof Number)) && isFinite(Value.valueOf());
-}
-/**** ValueIsInteger ****/
-function ValueIsInteger(Value) {
-    if ((typeof Value !== 'number') && !(Value instanceof Number)) {
-        return false;
-    }
-    Value = Value.valueOf();
-    return isFinite(Value) && (Math.round(Value) === Value);
-}
-/**** ValueIsString ****/
-function ValueIsString(Value) {
-    return (typeof Value === 'string') || (Value instanceof String);
-}
-/**** ValueIs[Non]EmptyString ****/
-var emptyStringPattern = /^\s*$/;
-function ValueIsNonEmptyString(Value) {
-    return ((typeof Value === 'string') || (Value instanceof String)) && !emptyStringPattern.test(Value.valueOf());
-}
-/**** ValueIsFunction ****/
-function ValueIsFunction(Value) {
-    return (typeof Value === 'function');
-}
-/**** ValueIsObject ****/
-function ValueIsObject(Value) {
-    return (Value != null) && (typeof Value === 'object');
-}
-/**** ValueIsPlainObject ****/
-function ValueIsPlainObject(Value) {
-    return ((Value != null) && (typeof Value === 'object') &&
-        (Object.getPrototypeOf(Value) === Object.prototype));
-}
-/**** ValueIsArray ****/
-var ValueIsArray = Array.isArray;
-/**** ValueIsListSatisfying ****/
-function ValueIsListSatisfying(Value, Validator, minLength, maxLength) {
-    if (ValueIsArray(Value)) {
-        try {
-            for (var i = 0, l = Value.length; i < l; i++) {
-                if (Validator(Value[i]) == false) {
-                    return false;
-                }
-            }
-            if (minLength != null) {
-                if (Value.length < minLength) {
-                    return false;
-                }
-            }
-            if (maxLength != null) {
-                if (Value.length > maxLength) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        catch (Signal) { /* nop */ }
-    }
-    return false;
-}
-/**** ValueIsOneOf ****/
-function ValueIsOneOf(Value, ValueList) {
-    return (ValueList.indexOf(Value) >= 0);
-} // no automatic unboxing of boxed values and vice-versa!
-//------------------------------------------------------------------------------
-//--                      Argument Validation Functions                       --
-//------------------------------------------------------------------------------
-var rejectNil = false;
-var acceptNil = true;
-/**** validatedArgument ****/
-function validatedArgument(Description, Argument, ValueIsValid, NilIsAcceptable, Expectation) {
-    if (Argument == null) {
-        if (NilIsAcceptable) {
-            return Argument;
-        }
-        else {
-            throwError("MissingArgument: no " + escaped(Description) + " given");
-        }
-    }
-    else {
-        if (ValueIsValid(Argument)) {
-            switch (true) {
-                case Argument instanceof Boolean:
-                case Argument instanceof Number:
-                case Argument instanceof String:
-                    return Argument.valueOf(); // unboxes any primitives
-                default:
-                    return Argument;
-            }
-        }
-        else {
-            throwError("InvalidArgument: the given " + escaped(Description) + " is no valid " + escaped(Expectation));
-        }
-    }
-}
-/**** ValidatorForClassifier ****/
-function ValidatorForClassifier(Classifier, NilIsAcceptable, Expectation) {
-    var Validator = function (Description, Argument) {
-        return validatedArgument(Description, Argument, Classifier, NilIsAcceptable, Expectation);
-    };
-    var ClassifierName = Classifier.name;
-    if ((ClassifierName != null) && /^ValueIs/.test(ClassifierName)) {
-        var ValidatorName = ClassifierName.replace(// derive name from validator
-        /^ValueIs/, NilIsAcceptable ? 'allow' : 'expect');
-        return FunctionWithName(Validator, ValidatorName);
-    }
-    else {
-        return Validator; // without any specific name
-    }
-}
-/**** FunctionWithName (works with older JS engines as well) ****/
-function FunctionWithName(originalFunction, desiredName) {
-    if (originalFunction == null) {
-        throwError('MissingArgument: no function given');
-    }
-    if (typeof originalFunction !== 'function') {
-        throwError('InvalidArgument: the given 1st Argument is not a JavaScript function');
-    }
-    if (desiredName == null) {
-        throwError('MissingArgument: no desired name given');
-    }
-    if ((typeof desiredName !== 'string') && !(desiredName instanceof String)) {
-        throwError('InvalidArgument: the given desired name is not a string');
-    }
-    if (originalFunction.name === desiredName) {
-        return originalFunction;
-    }
-    try {
-        Object.defineProperty(originalFunction, 'name', { value: desiredName });
-        if (originalFunction.name === desiredName) {
-            return originalFunction;
-        }
-    }
-    catch (signal) { /* ok - let's take the hard way */ }
-    var renamed = new Function('originalFunction', 'return function ' + desiredName + ' () {' +
-        'return originalFunction.apply(this,Array.prototype.slice.apply(arguments))' +
-        '}');
-    return renamed(originalFunction);
-} // also works with older JavaScript engines
-/**** allow/expect[ed]FiniteNumber ****/
-var allowFiniteNumber = /*#__PURE__*/ ValidatorForClassifier(ValueIsFiniteNumber, acceptNil, 'finite numeric value'), allowedFiniteNumber = allowFiniteNumber;
-var expectInteger = /*#__PURE__*/ ValidatorForClassifier(ValueIsInteger, rejectNil, 'integral numeric value');
-/**** allow[ed]IntegerInRange ****/
-function allowIntegerInRange(Description, Argument, minValue, maxValue) {
-    return (Argument == null
-        ? Argument
-        : expectedIntegerInRange(Description, Argument, minValue, maxValue));
-}
-var allowedIntegerInRange = allowIntegerInRange;
-/**** expect[ed]IntegerInRange ****/
-function expectIntegerInRange(Description, Argument, minValue, maxValue) {
-    expectInteger(Description, Argument);
-    if (isNaN(Argument)) {
-        throwError("InvalidArgument: the given " + escaped(Description) + " is not-a-number");
-    }
-    if ((minValue != null) && isFinite(minValue)) {
-        if ((maxValue != null) && isFinite(maxValue)) {
-            if ((Argument < minValue) || (Argument > maxValue)) {
-                throw new RangeError("the given " + escaped(Description) + " (" + Argument + ") is outside " +
-                    ("the allowed range (" + minValue + "..." + maxValue + ")"));
-            }
-        }
-        else {
-            if (Argument < minValue) {
-                throw new RangeError("the given " + escaped(Description) + " is below the allowed " +
-                    ("minimum (" + Argument + " < " + minValue + ")"));
-            }
-        }
-    }
-    else {
-        if ((maxValue != null) && isFinite(maxValue)) {
-            if (Argument > maxValue) {
-                throw new RangeError("the given " + escaped(Description) + " exceeds the allowed " +
-                    ("maximum (" + Argument + " > " + maxValue + ")"));
-            }
-        }
-    }
-    return Argument.valueOf();
-}
-var expectedIntegerInRange = expectIntegerInRange;
-/**** allow/expect[ed]String ****/
-var allowString = /*#__PURE__*/ ValidatorForClassifier(ValueIsString, acceptNil, 'literal string'), allowedString = allowString;
-/**** allow/expect[ed]NonEmptyString ****/
-var allowNonEmptyString = /*#__PURE__*/ ValidatorForClassifier(ValueIsNonEmptyString, acceptNil, 'non-empty literal string'), allowedNonEmptyString = allowNonEmptyString;
-/**** allow/expect[ed]Function ****/
-var allowFunction = /*#__PURE__*/ ValidatorForClassifier(ValueIsFunction, acceptNil, 'JavaScript function'), allowedFunction = allowFunction;
-var expectObject = /*#__PURE__*/ ValidatorForClassifier(ValueIsObject, rejectNil, 'JavaScript object');
-/**** allow/expect[ed]PlainObject ****/
-var allowPlainObject = /*#__PURE__*/ ValidatorForClassifier(ValueIsPlainObject, acceptNil, '"plain" JavaScript object'), allowedPlainObject = allowPlainObject;
-/**** allow[ed]ListSatisfying ****/
-function allowListSatisfying(Description, Argument, Validator, Expectation, minLength, maxLength) {
-    return (Argument == null
-        ? Argument
-        : expectedListSatisfying(Description, Argument, Validator, Expectation, minLength, maxLength));
-}
-/**** expect[ed]ListSatisfying ****/
-function expectListSatisfying(Description, Argument, Validator, Expectation, minLength, maxLength) {
-    if (Argument == null) {
-        throwError("MissingArgument: no " + escaped(Description) + " given");
-    }
-    if (ValueIsListSatisfying(Argument, Validator, minLength, maxLength)) {
-        return Argument;
-    }
-    else {
-        throwError("InvalidArgument: the given " + escaped(Description) + " is " + (Expectation == null
-            ? 'either not a list or contains invalid elements'
-            : 'no ' + escaped(Expectation)));
-    }
-}
-var expectedListSatisfying = expectListSatisfying;
-/**** escaped - escapes all control characters in a given string ****/
-function escaped(Text) {
-    var EscapeSequencePattern = /\\x[0-9a-zA-Z]{2}|\\u[0-9a-zA-Z]{4}|\\[0bfnrtv'"\\\/]?/g;
-    var CtrlCharCodePattern = /[\x00-\x1f\x7f-\x9f]/g;
-    return Text
-        .replace(EscapeSequencePattern, function (Match) {
-        return (Match === '\\' ? '\\\\' : Match);
-    })
-        .replace(CtrlCharCodePattern, function (Match) {
-        switch (Match) {
-            case '\0': return '\\0';
-            case '\b': return '\\b';
-            case '\f': return '\\f';
-            case '\n': return '\\n';
-            case '\r': return '\\r';
-            case '\t': return '\\t';
-            case '\v': return '\\v';
-            default: {
-                var HexCode = Match.charCodeAt(0).toString(16);
-                return '\\x' + '00'.slice(HexCode.length) + HexCode;
-            }
-        }
-    });
-}
-/**** quotable - makes a given string ready to be put in single/double quotes ****/
-function quotable(Text, Quote) {
-    if (Quote === void 0) { Quote = '"'; }
-    var EscSeqOrSglQuotePattern = /\\x[0-9a-zA-Z]{2}|\\u[0-9a-zA-Z]{4}|\\[0bfnrtv'"\\\/]?|'/g;
-    var EscSeqOrDblQuotePattern = /\\x[0-9a-zA-Z]{2}|\\u[0-9a-zA-Z]{4}|\\[0bfnrtv'"\\\/]?|"/g;
-    var CtrlCharCodePattern = /[\x00-\x1f\x7f-\x9f]/g;
-    return Text
-        .replace(Quote === "'" ? EscSeqOrSglQuotePattern : EscSeqOrDblQuotePattern, function (Match) {
-        switch (Match) {
-            case "'": return "\\'";
-            case '"': return '\\"';
-            case '\\': return '\\\\';
-            default: return Match;
-        }
-    })
-        .replace(CtrlCharCodePattern, function (Match) {
-        switch (Match) {
-            case '\0': return '\\0';
-            case '\b': return '\\b';
-            case '\f': return '\\f';
-            case '\n': return '\\n';
-            case '\r': return '\\r';
-            case '\t': return '\\t';
-            case '\v': return '\\v';
-            default: {
-                var HexCode = Match.charCodeAt(0).toString(16);
-                return '\\x' + '00'.slice(HexCode.length) + HexCode;
-            }
-        }
-    });
-}
-/**** quoted ****/
-function quoted(Text, Quote) {
-    if (Quote === void 0) { Quote = '"'; }
-    return Quote + quotable(Text, Quote) + Quote;
-}
-/**** ObjectIsEmpty ****/
-function ObjectIsEmpty(Candidate) {
-    expectObject('candidate', Candidate);
-    for (var Key in Candidate) {
-        if (Object_hasOwnProperty(Candidate, Key)) {
-            return false;
-        }
-    }
-    return true;
-}
-/**** ObjectIsNotEmpty ****/
-function ObjectIsNotEmpty(Candidate) {
-    return !ObjectIsEmpty(Candidate);
-}
-/**** constrained ****/
-function constrained(Value, Minimum, Maximum) {
-    if (Minimum === void 0) { Minimum = -Infinity; }
-    if (Maximum === void 0) { Maximum = Infinity; }
-    return Math.max(Minimum, Math.min(Value, Maximum));
-}
-
-var e={fromViewportTo:function(e,t,o){switch(!0){case null==t:throw new Error('no "Position" given');case"number"!=typeof t.left&&!(t.left instanceof Number):case"number"!=typeof t.top&&!(t.top instanceof Number):throw new Error('invalid "Position" given')}switch(e){case null:case void 0:throw new Error("no coordinate system given");case"viewport":return {left:t.left,top:t.top};case"document":return {left:t.left+window.scrollX,top:t.top+window.scrollY};case"local":switch(!0){case null==o:throw new Error("no target element given");case o instanceof Element:var r=window.getComputedStyle(o),n=parseFloat(r.borderLeftWidth),i=parseFloat(r.borderTopWidth),l=o.getBoundingClientRect();return {left:t.left-l.left-n,top:t.top-l.top-i};default:throw new Error("invalid target element given")}default:throw new Error("invalid coordinate system given")}},fromDocumentTo:function(e,t,o){switch(!0){case null==t:throw new Error('no "Position" given');case"number"!=typeof t.left&&!(t.left instanceof Number):case"number"!=typeof t.top&&!(t.top instanceof Number):throw new Error('invalid "Position" given')}switch(e){case null:case void 0:throw new Error("no coordinate system given");case"viewport":return {left:t.left-window.scrollX,top:t.top-window.scrollY};case"document":return {left:t.left,top:t.top};case"local":switch(!0){case null==o:throw new Error("no target element given");case o instanceof Element:var r=window.getComputedStyle(o),n=parseFloat(r.borderLeftWidth),i=parseFloat(r.borderTopWidth),l=o.getBoundingClientRect();return {left:t.left+window.scrollX-l.left-n,top:t.top+window.scrollY-l.top-i};default:throw new Error("invalid target element given")}default:throw new Error("invalid coordinate system given")}},fromLocalTo:function(e,t,o){switch(!0){case null==t:throw new Error('no "Position" given');case"number"!=typeof t.left&&!(t.left instanceof Number):case"number"!=typeof t.top&&!(t.top instanceof Number):throw new Error('invalid "Position" given')}var r,n,i;switch(!0){case null==o:throw new Error("no source element given");case o instanceof Element:var l=window.getComputedStyle(o),a=parseFloat(l.borderLeftWidth),s=parseFloat(l.borderTopWidth);n=(r=o.getBoundingClientRect()).left+a,i=r.top+s;break;default:throw new Error("invalid source element given")}switch(e){case null:case void 0:throw new Error("no coordinate system given");case"viewport":return {left:t.left+n,top:t.top+i};case"document":return {left:t.left+n+window.scrollX,top:t.top+i+window.scrollY};case"local":return {left:t.left,top:t.top};default:throw new Error("invalid coordinate system given")}}};
+import { allowedPlainObject, throwError, ValueIsNonEmptyString, allowedNonEmptyString, ValueIsFunction, allowedFiniteNumber, ValueIsPlainObject, ValueIsFiniteNumber, allowedFunction, constrained, ValueIsString, ObjectIsNotEmpty, allowPlainObject, quoted, allowedIntegerInRange, ValueIsOneOf, allowedString, allowListSatisfying } from 'javascript-interface-library';
+import Conversion from 'svelte-coordinate-conversion';
 
 //----------------------------------------------------------------------------//
 /**** parsedDraggableOptions ****/
@@ -425,7 +109,7 @@ function asDraggable(Element, Options) {
             return false;
         }
         PositionReference = PositionReferenceFor(Element, Options);
-        var relativePosition = e.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, PositionReference); // relative to reference element
+        var relativePosition = Conversion.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, PositionReference); // relative to reference element
         ReferenceDeltaX = ReferenceDeltaY = 0;
         initialPosition = { x: 0, y: 0 };
         if (Options.onDragStart == null) {
@@ -458,7 +142,7 @@ function asDraggable(Element, Options) {
             var OffsetX = Options.DummyOffsetX;
             var OffsetY = Options.DummyOffsetY;
             if ((OffsetX == null) || (OffsetY == null)) {
-                var PositionInDraggable = e.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, Element);
+                var PositionInDraggable = Conversion.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, Element);
                 if (OffsetX == null) {
                     OffsetX = PositionInDraggable.left;
                 }
@@ -502,7 +186,7 @@ function asDraggable(Element, Options) {
         }
         else {
             PositioningWasDelayed = false;
-            var relativePosition = e.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, PositionReference); // relative to reference element
+            var relativePosition = Conversion.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, PositionReference); // relative to reference element
             var x = relativePosition.left + ReferenceDeltaX; // in user coordinates
             var y = relativePosition.top + ReferenceDeltaY;
             x = constrained(x, Options.minX, Options.maxX);
@@ -581,7 +265,7 @@ function innerElementOf(Candidate, x, y) {
     var innerElements = Candidate.children;
     for (var i = 0, l = innerElements.length; i < l; i++) {
         var innerElement = innerElements[i];
-        var Position = e.fromLocalTo('viewport', { left: 0, top: 0 }, innerElement);
+        var Position = Conversion.fromLocalTo('viewport', { left: 0, top: 0 }, innerElement);
         if ((x < Position.left) || (y < Position.top)) {
             continue;
         }
@@ -655,7 +339,7 @@ function asDroppable(Element, Options) {
             return false;
         }
         PositionReference = PositionReferenceFor(Element, Options);
-        var relativePosition = e.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, PositionReference); // relative to reference element
+        var relativePosition = Conversion.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, PositionReference); // relative to reference element
         ReferenceDeltaX = ReferenceDeltaY = 0;
         initialPosition = { x: 0, y: 0 };
         if (Options.onDragStart == null) {
@@ -690,7 +374,7 @@ function asDroppable(Element, Options) {
             var OffsetX = Options.DummyOffsetX;
             var OffsetY = Options.DummyOffsetY;
             if ((OffsetX == null) || (OffsetY == null)) {
-                var PositionInDraggable = e.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, Element);
+                var PositionInDraggable = Conversion.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, Element);
                 if (OffsetX == null) {
                     OffsetX = PositionInDraggable.left;
                 }
@@ -749,7 +433,7 @@ function asDroppable(Element, Options) {
         }
         else {
             PositioningWasDelayed = false;
-            var relativePosition = e.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, PositionReference); // relative to reference element
+            var relativePosition = Conversion.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, PositionReference); // relative to reference element
             var x = relativePosition.left + ReferenceDeltaX; // in user coordinates
             var y = relativePosition.top + ReferenceDeltaY;
             x = constrained(x, Options.minX, Options.maxX);
@@ -904,7 +588,7 @@ function asDropZone(Element, Options) {
         if (offeredTypeList.length === 0) {
             return;
         }
-        var DropZonePosition = asPosition(e.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, Element)); // relative to DropZone element
+        var DropZonePosition = asPosition(Conversion.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, Element)); // relative to DropZone element
         var accepted = ResultOfHandler('onDroppableEnter', Options, DropZonePosition.x, DropZonePosition.y, wantedOperation, offeredTypeList, currentDroppableExtras, Options.Extras);
         if (accepted === false) { // i.e. explicit "false" result required
             return;
@@ -955,7 +639,7 @@ function asDropZone(Element, Options) {
             Element.classList.remove('hovered');
             return;
         }
-        currentDropZonePosition = asPosition(e.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, Element)); // relative to DropZone element
+        currentDropZonePosition = asPosition(Conversion.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, Element)); // relative to DropZone element
         var accepted = ResultOfHandler('onDroppableMove', Options, currentDropZonePosition.x, currentDropZonePosition.y, wantedOperation, offeredTypeList, currentDroppableExtras, Options.Extras);
         if (accepted === false) { // i.e. explicit "false" result required
             currentDropZoneExtras = undefined;
@@ -1029,7 +713,7 @@ function asDropZone(Element, Options) {
             invokeHandler('onDroppableLeave', Options, currentDroppableExtras, Options.Extras);
             return;
         }
-        currentDropZonePosition = asPosition(e.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, Element)); // relative to DropZone element
+        currentDropZonePosition = asPosition(Conversion.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, Element)); // relative to DropZone element
         var offeredData = {};
         offeredTypeList.forEach(
         // @ts-ignore originalEvent.dataTransfer definitely exists
