@@ -423,6 +423,9 @@
     DataToOffer = Object.assign(
       {}, allowedPlainObject('data to be offered',Options.DataToOffer)
     )
+    if ('none' in DataToOffer) throwError(
+      'InvalidArgument: "none" is not a valid data type'
+    )
 
     onDropZoneEnter = allowedFunction('"onDropZoneEnter" handler',Options.onDropZoneEnter)
     onDropZoneHover = allowedFunction('"onDropZoneHover" handler',Options.onDropZoneHover)
@@ -765,6 +768,10 @@
 
     allowPlainObject('data types to be accepted',Options.TypesToAccept)
     TypesToAccept = Object.create(null)
+      if ('none' in Options.TypesToAccept) throwError(
+        'InvalidArgument: "none" is not a valid data type'
+      )
+
       for (let Type in Options.TypesToAccept) {
         if (Options.TypesToAccept.hasOwnProperty(Type)) {
           TypesToAccept[Type] = parsedOperations(
