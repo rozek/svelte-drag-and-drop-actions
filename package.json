@@ -3,7 +3,7 @@
   "version": "0.1.23",
   "description": "HTML5 Drag-and-Drop implemented as Svelte actions",
   "type": "module",
-  "main": "./dist/svelte-drag-and-drop-actions.js",
+  "browser": "./dist/svelte-drag-and-drop-actions.js",
   "module": "./dist/svelte-drag-and-drop-actions.esm.js",
   "svelte": "./dist/svelte-drag-and-drop-actions.esm.js",
   "types": "./dist/svelte-drag-and-drop-actions.d.ts",
