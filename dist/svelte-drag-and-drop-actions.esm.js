@@ -300,6 +300,8 @@ function parsedDroppableOptions(Options) {
     var onDropped;
     Operations = parsedOperations('list of allowed operations', Options.Operations, 'copy');
     DataToOffer = Object.assign({}, allowedPlainObject('data to be offered', Options.DataToOffer));
+    if ('none' in DataToOffer)
+        throwError('InvalidArgument: "none" is not a valid data type');
     onDropZoneEnter = allowedFunction('"onDropZoneEnter" handler', Options.onDropZoneEnter);
     onDropZoneHover = allowedFunction('"onDropZoneHover" handler', Options.onDropZoneHover);
     onDropZoneLeave = allowedFunction('"onDropZoneLeave" handler', Options.onDropZoneLeave);
@@ -530,6 +532,8 @@ function parsedDropZoneOptions(Options) {
     Extras = Options.Extras;
     allowPlainObject('data types to be accepted', Options.TypesToAccept);
     TypesToAccept = Object.create(null);
+    if ('none' in Options.TypesToAccept)
+        throwError('InvalidArgument: "none" is not a valid data type');
     for (var Type in Options.TypesToAccept) {
         if (Options.TypesToAccept.hasOwnProperty(Type)) {
             TypesToAccept[Type] = parsedOperations('list of accepted operations for type ' + quoted(Type), Options.TypesToAccept[Type]);
