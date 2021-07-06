@@ -22,8 +22,6 @@ npm install svelte-drag-and-drop-actions
 
 The following example illustrates plain dragging of a "Draggable" within the bounds of a given "Arena". Read on to understand how it is working.
 
-Please note: **it is highly recommended to import the package within a module context**! While some applications may still work properly even if imported differently, in general, it may no longer be possible to drag items into drop zones that were implemented in a different module with its own import of `svelte-drag-drop-touch`.
-
 ```
 <script context="module">
   import  DragDropTouch  from 'svelte-drag-drop-touch' // for mobile platforms
