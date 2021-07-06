@@ -532,7 +532,7 @@ function parsedDropZoneOptions(Options) {
     Extras = Options.Extras;
     allowPlainObject('data types to be accepted', Options.TypesToAccept);
     TypesToAccept = Object.create(null);
-    if ('none' in Options.TypesToAccept)
+    if ((Options.TypesToAccept != null) && ('none' in Options.TypesToAccept))
         throwError('InvalidArgument: "none" is not a valid data type');
     for (var Type in Options.TypesToAccept) {
         if (Options.TypesToAccept.hasOwnProperty(Type)) {
