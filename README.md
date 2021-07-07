@@ -8,7 +8,7 @@ Instead of fully re-implementing the visual operation of web applications with m
 
 A first Svelte component based on `svelte-drag-and-drop-actions` is the [svelte-sortable-flat-list-view](https://github.com/rozek/svelte-sortable-flat-list-view).
 
-Please note: this package is currently under active development. Be invited to follow me on this road (with many detours searching for a [proper build environment](https://github.com/rozek/build-configuration-study), preparing [npm packages for Svelte](https://github.com/rozek/save-to-file) or struggling with singletons that turn out not to be so "single" in reality), but don't expect this package to be stable until perhaps end of July 2021 (sorry for frequent updates until then - sometimes you may see even multiple npm publications per day...).
+**Please note: this package is currently under active development. Be invited to follow me on this road (with many detours searching for a [proper build environment](https://github.com/rozek/build-configuration-study), preparing [npm packages for Svelte](https://github.com/rozek/save-to-file) or struggling with singletons that turn out not to be so "single" in reality), but don't expect this package to be stable until perhaps end of July 2021 (sorry for frequent updates until then - sometimes you may see even multiple npm publications per day...).**
 
 **NPM users**: please consider the [Github README](https://github.com/rozek/svelte-drag-and-drop-actions/blob/main/README.md) for the latest description of this package (as updating the docs would otherwise always require a new NPM package version)
 
