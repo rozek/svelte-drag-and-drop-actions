@@ -223,6 +223,7 @@ Simply extending already existing native HTML5 drag-and-drop functionality has a
 * the cursor shown while dragging is under full control of the native drag-and-drop implementation and can not be influenced programmatically (with the minor exception of setting a proper drop operation for a Droppable)
 * a custom drag image must either be an image object or a visible(!) element within the document from which a snapshot is taken
 * the configured drag image can not be changed during dragging as it is constructed when dragging starts and never updated again
+* in some browsers, as soon as the document is scrolled (even a little bit only) a custom drag dummy "slides in" to its designated position when dragging starts rather than appears there from the beginning - this seems to be a browser bug which the author cannot compensate
 
 ## Build Instructions ##
 
