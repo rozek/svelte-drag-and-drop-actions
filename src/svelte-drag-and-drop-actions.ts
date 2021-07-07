@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------//
 
   import {
-    throwError,
+    global, throwError,
     ValueIsFiniteNumber, ValueIsString, ValueIsNonEmptyString,
     ValueIsFunction, ValueIsPlainObject, ValueIsOneOf,
     allowedFiniteNumber, allowedIntegerInRange, allowedString, allowedNonEmptyString,
@@ -13,6 +13,16 @@
   } from 'javascript-interface-library'
 
   import Conversion from 'svelte-coordinate-conversion'
+
+/**** never ever trust module loading if you REALLY need a singleton! ****/
+// finding multiple existing singletons if you actually trust them is so hard!
+
+  type ContextType = extendedDragAndDropSupport
+  const Context:ContextType = (            // make this package a REAL singleton
+    '__DragAndDropActions' in global
+    ? global.__DragAndDropActions
+    : global.__DragAndDropActions = {}
+  )
 
 //-------------------------------------------------------------------------------
 //--             use:asDraggable={options} - "drag" without "drop"             --
@@ -384,15 +394,17 @@
 
 /**** extended Drag-and-Drop Support ****/
 
-  let currentDroppableExtras:any       // extras for currently dragged droppable
-  let currentDropZoneExtras:any        // extras for currently hovered drop zone
-  let currentDropZoneElement:Element|undefined                // dto. as Element
+  type extendedDragAndDropSupport = {
+    currentDroppableExtras:any,        // extras for currently dragged droppable
+    currentDropZoneExtras:any,         // extras for currently hovered drop zone
+    currentDropZoneElement:Element|undefined,                 // dto. as Element
 
-  let DroppableWasDropped:boolean       // indicates a successful drop operation
-  let currentDropZonePosition:Position|undefined// position relative to DropZone
-  let currentDropOperation:DropOperation|undefined      // actual drop operation
-  let currentTypeTransferred:string|undefined // actual type of transferred data
-  let currentDataTransferred:any                      // actual data transferred
+    DroppableWasDropped:boolean,        // indicates a successful drop operation
+    currentDropZonePosition:Position|undefined, // position relative to DropZone
+    currentDropOperation:DropOperation|undefined,       // actual drop operation
+    currentTypeTransferred:string|undefined,  // actual type of transferred data
+    currentDataTransferred:any,                       // actual data transferred
+  }
 
 //-------------------------------------------------------------------------------
 //--               use:asDroppable={options} - "drag" and "drop"               --
@@ -568,14 +580,14 @@
         }
       }
 
-      currentDroppableExtras  = Options.Extras
-      currentDropZoneExtras   = undefined
-      currentDropZonePosition = undefined
+      Context.currentDroppableExtras  = Options.Extras
+      Context.currentDropZoneExtras   = undefined
+      Context.currentDropZonePosition = undefined
 
-      DroppableWasDropped     = false
-      currentDropOperation    = undefined
-      currentTypeTransferred  = undefined
-      currentDataTransferred  = undefined
+      Context.DroppableWasDropped     = false
+      Context.currentDropOperation    = undefined
+      Context.currentTypeTransferred  = undefined
+      Context.currentDataTransferred  = undefined
 
       isDragged = true
       setTimeout(() => Element.classList.add('dragged'), 0)
@@ -618,29 +630,29 @@
         invokeHandler('onDragMove', Options, x,y, dx,dy, Options.Extras)
       }
 
-      if (currentDropZoneElement === lastDropZoneElement) {
-        if (currentDropZoneElement != null) {
+      if (Context.currentDropZoneElement === lastDropZoneElement) {
+        if (Context.currentDropZoneElement != null) {
           invokeHandler(
             'onDropZoneHover', Options,
-            (currentDropZonePosition as Position).x,(currentDropZonePosition as Position).y,
-            currentDropZoneExtras, Options.Extras
+            (Context.currentDropZonePosition as Position).x,(Context.currentDropZonePosition as Position).y,
+            Context.currentDropZoneExtras, Options.Extras
           )
         }
       } else {
-        if (currentDropZoneElement == null) {
+        if (Context.currentDropZoneElement == null) {
           Element.classList.remove('droppable')
           invokeHandler('onDropZoneLeave', Options, lastDropZoneExtras, Options.Extras)
         } else {
           Element.classList.add('droppable')
           invokeHandler(
             'onDropZoneEnter', Options,
-            (currentDropZonePosition as Position).x,(currentDropZonePosition as Position).y,
+            (Context.currentDropZonePosition as Position).x,(Context.currentDropZonePosition as Position).y,
             lastDropZoneExtras, Options.Extras
           )
         }
 
-        lastDropZoneElement = currentDropZoneElement as HTMLElement
-        lastDropZoneExtras  = currentDropZoneExtras
+        lastDropZoneElement = Context.currentDropZoneElement as HTMLElement
+        lastDropZoneExtras  = Context.currentDropZoneExtras
       }
 
       originalEvent.stopPropagation()
@@ -657,21 +669,21 @@
         {}, currentDraggableOptions, currentDroppableOptions
       )
 
-      if (DroppableWasDropped) {
+      if (Context.DroppableWasDropped) {
         invokeHandler(
           'onDropped', Options,
-          (currentDropZonePosition as Position).x,(currentDropZonePosition as Position).y,
-          currentDropOperation, currentTypeTransferred, currentDataTransferred,
-          currentDropZoneExtras, Options.Extras
+          (Context.currentDropZonePosition as Position).x,(Context.currentDropZonePosition as Position).y,
+          Context.currentDropOperation, Context.currentTypeTransferred, Context.currentDataTransferred,
+          Context.currentDropZoneExtras, Options.Extras
         )
 
-        currentDropZoneExtras   = undefined
-        currentDropZonePosition = undefined
+        Context.currentDropZoneExtras   = undefined
+        Context.currentDropZonePosition = undefined
 
-        DroppableWasDropped     = false
-        currentDropOperation    = undefined
-        currentTypeTransferred  = undefined
-        currentDataTransferred  = undefined
+        Context.DroppableWasDropped     = false
+        Context.currentDropOperation    = undefined
+        Context.currentTypeTransferred  = undefined
+        Context.currentDataTransferred  = undefined
       }
 
       if (Options.onDragEnd != null) {
@@ -684,7 +696,7 @@
         invokeHandler('onDragEnd', Options, x,y, dx,dy, Options.Extras)
       }
 
-      currentDroppableExtras = undefined
+      Context.currentDroppableExtras = undefined
 
       isDragged = false
       Element.classList.remove('dragged','droppable')
@@ -849,15 +861,15 @@
       let accepted:boolean|undefined = ResultOfHandler(
         'onDroppableEnter', Options,
         DropZonePosition.x, DropZonePosition.y,
-        wantedOperation, offeredTypeList, currentDroppableExtras, Options.Extras
+        wantedOperation, offeredTypeList, Context.currentDroppableExtras, Options.Extras
       )
 
       if (accepted === false) {         // i.e. explicit "false" result required
         return
       } else {
-        currentDropZoneExtras   = Options.Extras
-        currentDropZoneElement  = Element
-        currentDropZonePosition = DropZonePosition
+        Context.currentDropZoneExtras   = Options.Extras
+        Context.currentDropZoneElement  = Element
+        Context.currentDropZonePosition = DropZonePosition
 
         Element.classList.add('hovered')
 
@@ -872,7 +884,7 @@
       if (
         (originalEvent.dataTransfer == null) ||
         (originalEvent.dataTransfer.effectAllowed === 'none') ||
-        (currentDropZoneElement != null) && (currentDropZoneElement !== Element)
+        (Context.currentDropZoneElement != null) && (Context.currentDropZoneElement !== Element)
       ) {
         Element.classList.remove('hovered')
         return
@@ -898,36 +910,36 @@
         (TypesToAccept[Type] !== '')          // "getData" is not available here
       ) // cannot use "originalEvent.dataTransfer.dropEffect" due to browser bug
       if (offeredTypeList.length === 0) {
-        if (currentDropZoneElement === Element) {
-          currentDropZoneExtras   = undefined
-          currentDropZoneElement  = undefined
-          currentDropZonePosition = undefined
+        if (Context.currentDropZoneElement === Element) {
+          Context.currentDropZoneExtras   = undefined
+          Context.currentDropZoneElement  = undefined
+          Context.currentDropZonePosition = undefined
         }
 
         Element.classList.remove('hovered')
         return
       }
 
-      currentDropZonePosition = asPosition(Conversion.fromDocumentTo(
+      Context.currentDropZonePosition = asPosition(Conversion.fromDocumentTo(
         'local', { left:originalEvent.pageX, top:originalEvent.pageY }, Element
       ))                                         // relative to DropZone element
 
       let accepted = ResultOfHandler(
         'onDroppableMove', Options,
-        currentDropZonePosition.x, currentDropZonePosition.y,
-        wantedOperation, offeredTypeList, currentDroppableExtras, Options.Extras
+        Context.currentDropZonePosition.x, Context.currentDropZonePosition.y,
+        wantedOperation, offeredTypeList, Context.currentDroppableExtras, Options.Extras
       )
 
       if (accepted === false) {         // i.e. explicit "false" result required
-        currentDropZoneExtras   = undefined
-        currentDropZoneElement  = undefined
-        currentDropZonePosition = undefined
+        Context.currentDropZoneExtras   = undefined
+        Context.currentDropZoneElement  = undefined
+        Context.currentDropZonePosition = undefined
 
         Element.classList.remove('hovered')
       } else {              // warning: sometimes (currentDropZone !== Element)!
-        currentDropZoneExtras   = Options.Extras
-        currentDropZoneElement  = Element
-//      currentDropZonePosition has already been set before
+        Context.currentDropZoneExtras   = Options.Extras
+        Context.currentDropZoneElement  = Element
+//      Context.currentDropZonePosition has already been set before
 
         Element.classList.add('hovered')
 
@@ -945,17 +957,17 @@
 
       let Options = currentDropZoneOptions
 
-      if (currentDropZoneElement === Element) {
-        if (currentTypeTransferred == null) {           // see explanation below
-          currentDropZoneExtras   = undefined
-          currentDropZoneElement  = undefined
+      if (Context.currentDropZoneElement === Element) {
+        if (Context.currentTypeTransferred == null) {   // see explanation below
+          Context.currentDropZoneExtras   = undefined
+          Context.currentDropZoneElement  = undefined
 
-          DroppableWasDropped     = false
-          currentDropZonePosition = undefined
-          currentTypeTransferred  = undefined
-          currentDataTransferred  = undefined
+          Context.DroppableWasDropped     = false
+          Context.currentDropZonePosition = undefined
+          Context.currentTypeTransferred  = undefined
+          Context.currentDataTransferred  = undefined
 
-          invokeHandler('onDroppableLeave', Options, currentDroppableExtras, Options.Extras)
+          invokeHandler('onDroppableLeave', Options, Context.currentDroppableExtras, Options.Extras)
         }                   // swallow "dragleave" right after successful "drop"
 
         originalEvent.preventDefault()
@@ -971,7 +983,7 @@
       if (
         (originalEvent.dataTransfer == null) ||
         (originalEvent.dataTransfer.effectAllowed === 'none') ||
-        (currentDropZoneElement !== Element)
+        (Context.currentDropZoneElement !== Element)
       ) { return }
 
 //    originalEvent.preventDefault()
@@ -997,20 +1009,20 @@
         )
       ) // cannot use "originalEvent.dataTransfer.dropEffect" due to browser bug
       if (offeredTypeList.length === 0) {
-        currentDropZoneExtras   = undefined
-        currentDropZonePosition = undefined
+        Context.currentDropZoneExtras   = undefined
+        Context.currentDropZonePosition = undefined
 
-        DroppableWasDropped     = false
-        currentDropOperation    = undefined
-        currentTypeTransferred  = undefined
-        currentDataTransferred  = undefined
+        Context.DroppableWasDropped     = false
+        Context.currentDropOperation    = undefined
+        Context.currentTypeTransferred  = undefined
+        Context.currentDataTransferred  = undefined
 
-        invokeHandler('onDroppableLeave', Options, currentDroppableExtras, Options.Extras)
+        invokeHandler('onDroppableLeave', Options, Context.currentDroppableExtras, Options.Extras)
 
         return
       }
 
-      currentDropZonePosition = asPosition(Conversion.fromDocumentTo(
+      Context.currentDropZonePosition = asPosition(Conversion.fromDocumentTo(
         'local', { left:originalEvent.pageX, top:originalEvent.pageY }, Element
       ))                                         // relative to DropZone element
 
@@ -1021,35 +1033,35 @@
         )
       let acceptedType = ResultOfHandler(
         'onDrop', Options,
-        currentDropZonePosition.x, currentDropZonePosition.y,
-        wantedOperation, offeredData, currentDroppableExtras, Options.Extras
+        Context.currentDropZonePosition.x, Context.currentDropZonePosition.y,
+        wantedOperation, offeredData, Context.currentDroppableExtras, Options.Extras
       )
 
       switch (true) {
         case (acceptedType == null):
-          DroppableWasDropped    = true
-          currentDropOperation   = wantedOperation
-          currentTypeTransferred = undefined
-          currentDataTransferred = undefined
+          Context.DroppableWasDropped    = true
+          Context.currentDropOperation   = wantedOperation
+          Context.currentTypeTransferred = undefined
+          Context.currentDataTransferred = undefined
           break
         case ValueIsOneOf(acceptedType,offeredTypeList):
-          DroppableWasDropped    = true
-          currentDropOperation   = wantedOperation
-          currentTypeTransferred = acceptedType
-          currentDataTransferred = offeredData[acceptedType]
+          Context.DroppableWasDropped    = true
+          Context.currentDropOperation   = wantedOperation
+          Context.currentTypeTransferred = acceptedType
+          Context.currentDataTransferred = offeredData[acceptedType]
           break
         default:               // handler should return false in case of failure
-          DroppableWasDropped     = false
-          currentDropZoneExtras   = undefined
-          currentDropZonePosition = undefined
-          currentDropOperation    = undefined
-          currentTypeTransferred  = undefined
-          currentDataTransferred  = undefined
+          Context.DroppableWasDropped     = false
+          Context.currentDropZoneExtras   = undefined
+          Context.currentDropZonePosition = undefined
+          Context.currentDropOperation    = undefined
+          Context.currentTypeTransferred  = undefined
+          Context.currentDataTransferred  = undefined
 
 //        invokeHandler('onDroppableLeave', Options, currentDroppableExtras, Options.Extras)
       }
 
-      currentDropZoneElement = undefined
+      Context.currentDropZoneElement = undefined
     }
 
   /**** updateDropZoneOptions ****/
