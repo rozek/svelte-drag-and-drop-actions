@@ -411,8 +411,8 @@
   type SupportForHoldingAndPanning = {
     HoldPosition?:Position,               // current position to compare against
     HoldTimer?:any,
-    HoldWasTriggered?:boolean                 // because we trigger it once only
-  }
+    HoldWasTriggeredForElement?:HTMLElement | SVGElement
+  }                                           // because we trigger it once only
 
 //-------------------------------------------------------------------------------
 //--               use:asDroppable={options} - "drag" and "drop"               --
@@ -848,11 +848,8 @@
 
       if (
         ValueIsNumber(Options.HoldDelay) && (Options.HoldDelay as number > 0) &&
-        ! Context.HoldWasTriggered
-      ) {
-        Context.HoldPosition = DropZonePosition
-        Context.HoldTimer    = setTimeout(triggerHold, Options.HoldDelay)
-      }
+        (Context.HoldWasTriggeredForElement !== Element)
+      ) { startHoldTimer(DropZonePosition) }
 
       if (
         (originalEvent.dataTransfer == null) ||
@@ -897,6 +894,7 @@
     }
 
   /**** hoveredByDroppable ****/
+// warning: I've already seen leftByDroppable followed by hoveredByDropable!
 
     function hoveredByDroppable (originalEvent:DragEvent) {
       let Options = currentDropZoneOptions
@@ -907,17 +905,12 @@
 
       if (
         ValueIsNumber(Options.HoldDelay) && (Options.HoldDelay as number > 0) &&
-        ! Context.HoldWasTriggered
+        (Context.HoldWasTriggeredForElement !== Element)
       ) {
-        let Offset = (
-          ((Context.HoldPosition as Position).x-DropZonePosition.x)**2 +
-          ((Context.HoldPosition as Position).y-DropZonePosition.y)**2
-        )
-        if (Offset > 25) {
-          Context.HoldPosition = DropZonePosition
-
-          clearTimeout(Context.HoldTimer)
-          Context.HoldTimer = setTimeout(triggerHold, Options.HoldDelay)
+        if (Context.HoldPosition == null) {           // see above for reasoning
+          startHoldTimer(DropZonePosition)
+        } else {
+          continueHoldTimer(DropZonePosition)
         }
       }
 
@@ -991,14 +984,7 @@
     function leftByDroppable (originalEvent:DragEvent) {
       Element.classList.remove('hovered')
 
-      delete Context.HoldPosition
-
-      if (Context.HoldTimer != null) {
-        clearTimeout(Context.HoldTimer)
-        delete Context.HoldTimer
-      }
-
-      delete Context.HoldWasTriggered
+      stopHoldTimer()
 
       let Options = currentDropZoneOptions
 
@@ -1025,14 +1011,7 @@
     function droppedByDroppable (originalEvent:DragEvent) {
       Element.classList.remove('hovered')
 
-      delete Context.HoldPosition
-
-      if (Context.HoldTimer != null) {
-        clearTimeout(Context.HoldTimer)
-        delete Context.HoldTimer
-      }
-
-      delete Context.HoldWasTriggered
+      stopHoldTimer()
 
       if (
         (originalEvent.dataTransfer == null) ||
@@ -1118,15 +1097,56 @@
       Context.currentDropZoneElement = undefined
     }
 
+  /**** startHoldTimer ****/
+
+    function startHoldTimer (DropZonePosition:Position):void {
+      Context.HoldPosition = DropZonePosition
+
+      if (Context.HoldTimer != null) {
+        clearTimeout(Context.HoldTimer)
+      }
+      Context.HoldTimer    = setTimeout(triggerHold, Options.HoldDelay)
+    }
+
+  /**** continueHoldTimer ****/
+
+    function continueHoldTimer (DropZonePosition:Position):void {
+      let Offset = (
+        ((Context.HoldPosition as Position).x-DropZonePosition.x)**2 +
+        ((Context.HoldPosition as Position).y-DropZonePosition.y)**2
+      )
+      if (Offset > 25) {
+        Context.HoldPosition = DropZonePosition
+
+        clearTimeout(Context.HoldTimer)
+        Context.HoldTimer = setTimeout(triggerHold, Options.HoldDelay)
+      }
+    }
+
+  /**** stopHoldTimer ****/
+
+    function stopHoldTimer () {
+      delete Context.HoldPosition
+
+      if (Context.HoldTimer != null) {
+        clearTimeout(Context.HoldTimer)
+        delete Context.HoldTimer
+      }
+
+      delete Context.HoldWasTriggeredForElement
+    }
+
   /**** triggerHold ****/
 
     function triggerHold () {
-      let DropZonePosition = Context.currentDropZonePosition || Context.HoldPosition
+      let DropZonePosition = (    // sometimes, there is no "enteredByDroppable"
+        Context.currentDropZonePosition || Context.HoldPosition
+      )
 
       delete Context.HoldPosition
       delete Context.HoldTimer
 
-      Context.HoldWasTriggered = true
+      Context.HoldWasTriggeredForElement = Element
 
       invokeHandler(
         'onDroppableHold', Options,
