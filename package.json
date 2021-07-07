@@ -46,6 +46,7 @@
   },
   "dependencies": {
     "javascript-interface-library": "^0.1.5",
-    "svelte-coordinate-conversion": "^0.1.6"
+    "svelte-coordinate-conversion": "^0.1.6",
+    "svelte-drag-and-drop-actions": "^0.1.28"
   }
 }
