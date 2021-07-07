@@ -4,7 +4,7 @@
 
   import {
     global, throwError,
-    ValueIsFiniteNumber, ValueIsString, ValueIsNonEmptyString,
+    ValueIsNumber, ValueIsFiniteNumber, ValueIsString, ValueIsNonEmptyString,
     ValueIsFunction, ValueIsPlainObject, ValueIsOneOf,
     allowedFiniteNumber, allowedIntegerInRange, allowedString, allowedNonEmptyString,
     allowPlainObject, allowedPlainObject,
@@ -17,7 +17,7 @@
 /**** never ever trust module loading if you REALLY need a singleton! ****/
 // finding multiple existing singletons if you actually trust them is so hard!
 
-  type ContextType = extendedDragAndDropSupport
+  type ContextType = extendedDragAndDropSupport & SupportForHoldingAndPanning
   const Context:ContextType = (            // make this package a REAL singleton
     '__DragAndDropActions' in global
     ? global.__DragAndDropActions
@@ -406,6 +406,14 @@
     currentDataTransferred:any,                       // actual data transferred
   }
 
+/**** Support for Holding and Panning ****/
+
+  type SupportForHoldingAndPanning = {
+    HoldPosition?:Position,               // current position to compare against
+    HoldTimer?:any,
+    HoldWasTriggered?:boolean                 // because we trigger it once only
+  }
+
 //-------------------------------------------------------------------------------
 //--               use:asDroppable={options} - "drag" and "drop"               --
 //-------------------------------------------------------------------------------
@@ -583,6 +591,7 @@
       Context.currentDroppableExtras  = Options.Extras
       Context.currentDropZoneExtras   = undefined
       Context.currentDropZonePosition = undefined
+      Context.currentDropZoneElement  = undefined
 
       Context.DroppableWasDropped     = false
       Context.currentDropOperation    = undefined
@@ -679,6 +688,7 @@
 
         Context.currentDropZoneExtras   = undefined
         Context.currentDropZonePosition = undefined
+        Context.currentDropZoneElement  = undefined
 
         Context.DroppableWasDropped     = false
         Context.currentDropOperation    = undefined
@@ -764,7 +774,6 @@
   type DropZoneOptions = {
     Extras?:any,
     TypesToAccept?:TypeAcceptanceSet,
-    HoldDelay?:number,
     onDroppableEnter?:(x:number,y:number, Operation:DropOperation, offeredTypeList:string[],
                         DroppableExtras:any, DropZoneExtras:any) => boolean|undefined,
     onDroppableMove?: (x:number,y:number, Operation:DropOperation, offeredTypeList:string[],
@@ -773,6 +782,9 @@
     onDroppableLeave?:(DroppableExtras:any, DropZoneExtras:any) => void,
     onDrop?:          (x:number,y:number, Operation:DropOperation, DataOffered:any,
                         DroppableExtras:any, DropZoneExtras:any) => string | undefined,
+
+    HoldDelay?:number,
+    onHold?:(x:number,y:number, DroppableExtras:any, DropZoneExtras:any) => void,
   }
 
 /**** parsedDropZoneOptions ****/
@@ -780,9 +792,10 @@
   function parsedDropZoneOptions (Options:any):DropZoneOptions {
     Options = allowedPlainObject('drop zone options',Options) || {}
 
-    let Extras:any, TypesToAccept:TypeAcceptanceSet, HoldDelay:number
+    let Extras:any, TypesToAccept:TypeAcceptanceSet
     let onDroppableEnter:Function, onDroppableMove:Function, onDroppableLeave:Function
     let onDroppableHold:Function, onDroppableRelease:Function, onDrop:Function
+    let HoldDelay:number, onHold:Function
 
     Extras = Options.Extras
 
@@ -800,8 +813,6 @@
           )
         }
       }
-    HoldDelay = allowedIntegerInRange('min. time to hold',Options.HoldDelay, 0) as number
-
     onDroppableEnter   = allowedFunction('"onDroppableEnter" handler',  Options.onDroppableEnter)
     onDroppableMove    = allowedFunction('"onDroppableMove" handler',   Options.onDroppableMove)
     onDroppableLeave   = allowedFunction('"onDroppableLeave" handler',  Options.onDroppableLeave)
@@ -809,12 +820,17 @@
     onDroppableRelease = allowedFunction('"onDroppableRelease" handler',Options.onDroppableRelease)
     onDrop             = allowedFunction('"onDrop" handler',            Options.onDrop)
 
+    HoldDelay = allowedIntegerInRange('min. time to hold',Options.HoldDelay, 0) as number
+    onHold    = allowedFunction       ('"onHold" handler',Options.onHold)
+
     return {
-      Extras, TypesToAccept, HoldDelay,
+      Extras, TypesToAccept,
 // @ts-ignore we cannot validate given functions any further
       onDroppableEnter, onDroppableMove, onDroppableLeave,
 // @ts-ignore we cannot validate given functions any further
-      onDroppableHold, onDroppableRelease, onDrop
+      onDroppableHold, onDroppableRelease, onDrop,
+// @ts-ignore we cannot validate given functions any further
+      HoldDelay, onHold
     }
   }
 
@@ -830,12 +846,24 @@
   /**** enteredByDroppable ****/
 
     function enteredByDroppable (originalEvent:DragEvent) {
+      let Options = currentDropZoneOptions
+
+      let DropZonePosition = asPosition(Conversion.fromDocumentTo(
+        'local', { left:originalEvent.pageX, top:originalEvent.pageY }, Element
+      ))                                         // relative to DropZone element
+
+      if (
+        ValueIsNumber(Options.HoldDelay) && (Options.HoldDelay as number > 0) &&
+        ! Context.HoldWasTriggered
+      ) {
+        Context.HoldPosition = DropZonePosition
+        Context.HoldTimer    = setTimeout(triggerHold, Options.HoldDelay)
+      }
+
       if (
         (originalEvent.dataTransfer == null) ||
         (originalEvent.dataTransfer.effectAllowed === 'none')
       ) { return }
-
-      let Options = currentDropZoneOptions
 
       let wantedOperation:any = originalEvent.dataTransfer.dropEffect
       if (wantedOperation === 'none') {            // workaround for browser bug
@@ -853,10 +881,6 @@
         (TypesToAccept[Type] !== '')          // "getData" is not available here
       ) // cannot use "originalEvent.dataTransfer.dropEffect" due to browser bug
       if (offeredTypeList.length === 0) { return }
-
-      let DropZonePosition = asPosition(Conversion.fromDocumentTo(
-        'local', { left:originalEvent.pageX, top:originalEvent.pageY }, Element
-      ))                                         // relative to DropZone element
 
       let accepted:boolean|undefined = ResultOfHandler(
         'onDroppableEnter', Options,
@@ -881,6 +905,28 @@
   /**** hoveredByDroppable ****/
 
     function hoveredByDroppable (originalEvent:DragEvent) {
+      let Options = currentDropZoneOptions
+
+      let DropZonePosition = asPosition(Conversion.fromDocumentTo(
+        'local', { left:originalEvent.pageX, top:originalEvent.pageY }, Element
+      ))                                         // relative to DropZone element
+
+      if (
+        ValueIsNumber(Options.HoldDelay) && (Options.HoldDelay as number > 0) &&
+        ! Context.HoldWasTriggered
+      ) {
+        let Offset = (
+          ((Context.HoldPosition as Position).x-DropZonePosition.x)**2 +
+          ((Context.HoldPosition as Position).y-DropZonePosition.y)**2
+        )
+        if (Offset > 25) {
+          Context.HoldPosition = DropZonePosition
+
+          clearTimeout(Context.HoldTimer)
+          Context.HoldTimer = setTimeout(triggerHold, Options.HoldDelay)
+        }
+      }
+
       if (
         (originalEvent.dataTransfer == null) ||
         (originalEvent.dataTransfer.effectAllowed === 'none') ||
@@ -891,8 +937,6 @@
       }
 
 // in some browsers, it may be that (currentDropZone !== Element)!
-
-      let Options = currentDropZoneOptions
 
       let wantedOperation:any = originalEvent.dataTransfer.dropEffect
       if (wantedOperation === 'none') {            // workaround for browser bug
@@ -920,9 +964,7 @@
         return
       }
 
-      Context.currentDropZonePosition = asPosition(Conversion.fromDocumentTo(
-        'local', { left:originalEvent.pageX, top:originalEvent.pageY }, Element
-      ))                                         // relative to DropZone element
+      Context.currentDropZonePosition = DropZonePosition
 
       let accepted = ResultOfHandler(
         'onDroppableMove', Options,
@@ -955,6 +997,15 @@
     function leftByDroppable (originalEvent:DragEvent) {
       Element.classList.remove('hovered')
 
+      delete Context.HoldPosition
+
+      if (Context.HoldTimer != null) {
+        clearTimeout(Context.HoldTimer)
+        delete Context.HoldTimer
+      }
+
+      delete Context.HoldWasTriggered
+
       let Options = currentDropZoneOptions
 
       if (Context.currentDropZoneElement === Element) {
@@ -979,6 +1030,15 @@
 
     function droppedByDroppable (originalEvent:DragEvent) {
       Element.classList.remove('hovered')
+
+      delete Context.HoldPosition
+
+      if (Context.HoldTimer != null) {
+        clearTimeout(Context.HoldTimer)
+        delete Context.HoldTimer
+      }
+
+      delete Context.HoldWasTriggered
 
       if (
         (originalEvent.dataTransfer == null) ||
@@ -1062,6 +1122,23 @@
       }
 
       Context.currentDropZoneElement = undefined
+    }
+
+  /**** triggerHold ****/
+
+    function triggerHold () {
+      let DropZonePosition = Context.currentDropZonePosition || Context.HoldPosition
+
+      delete Context.HoldPosition
+      delete Context.HoldTimer
+
+      Context.HoldWasTriggered = true
+
+      invokeHandler(
+        'onHold', Options,
+        (DropZonePosition as Position).x, (DropZonePosition as Position).y,
+        Context.currentDroppableExtras, Options.Extras
+      )
     }
 
   /**** updateDropZoneOptions ****/
