@@ -48,12 +48,13 @@ export declare type TypeAcceptanceSet = {
 declare type DropZoneOptions = {
     Extras?: any;
     TypesToAccept?: TypeAcceptanceSet;
-    HoldDelay?: number;
     onDroppableEnter?: (x: number, y: number, Operation: DropOperation, offeredTypeList: string[], DroppableExtras: any, DropZoneExtras: any) => boolean | undefined;
     onDroppableMove?: (x: number, y: number, Operation: DropOperation, offeredTypeList: string[], DroppableExtras: any, DropZoneExtras: any) => boolean | undefined;
     onDroppableHold?: (x: number, y: number, DroppableExtras: any, DropZoneExtras: any) => void;
     onDroppableLeave?: (DroppableExtras: any, DropZoneExtras: any) => void;
     onDrop?: (x: number, y: number, Operation: DropOperation, DataOffered: any, DroppableExtras: any, DropZoneExtras: any) => string | undefined;
+    HoldDelay?: number;
+    onHold?: (x: number, y: number, DroppableExtras: any, DropZoneExtras: any) => void;
 };
 /**** use:asDropZone={options} ****/
 export declare function asDropZone(Element: HTMLElement | SVGElement, Options: DropZoneOptions): {

@@ -1,4 +1,4 @@
-import { global, allowedPlainObject, throwError, ValueIsNonEmptyString, allowedNonEmptyString, ValueIsFunction, allowedFiniteNumber, ValueIsPlainObject, ValueIsFiniteNumber, allowedFunction, constrained, ValueIsString, ObjectIsNotEmpty, allowPlainObject, quoted, allowedIntegerInRange, ValueIsOneOf, allowedString, allowListSatisfying } from 'javascript-interface-library';
+import { global, allowedPlainObject, throwError, ValueIsNonEmptyString, allowedNonEmptyString, ValueIsFunction, allowedFiniteNumber, ValueIsPlainObject, ValueIsFiniteNumber, allowedFunction, constrained, ValueIsString, ObjectIsNotEmpty, allowPlainObject, quoted, allowedIntegerInRange, ValueIsNumber, ValueIsOneOf, allowedString, allowListSatisfying } from 'javascript-interface-library';
 import Conversion from 'svelte-coordinate-conversion';
 
 //----------------------------------------------------------------------------//
@@ -412,6 +412,7 @@ function asDroppable(Element, Options) {
         Context.currentDroppableExtras = Options.Extras;
         Context.currentDropZoneExtras = undefined;
         Context.currentDropZonePosition = undefined;
+        Context.currentDropZoneElement = undefined;
         Context.DroppableWasDropped = false;
         Context.currentDropOperation = undefined;
         Context.currentTypeTransferred = undefined;
@@ -472,6 +473,7 @@ function asDroppable(Element, Options) {
             invokeHandler('onDropped', Options, Context.currentDropZonePosition.x, Context.currentDropZonePosition.y, Context.currentDropOperation, Context.currentTypeTransferred, Context.currentDataTransferred, Context.currentDropZoneExtras, Options.Extras);
             Context.currentDropZoneExtras = undefined;
             Context.currentDropZonePosition = undefined;
+            Context.currentDropZoneElement = undefined;
             Context.DroppableWasDropped = false;
             Context.currentDropOperation = undefined;
             Context.currentTypeTransferred = undefined;
@@ -525,9 +527,10 @@ function asDroppable(Element, Options) {
 /**** parsedDropZoneOptions ****/
 function parsedDropZoneOptions(Options) {
     Options = allowedPlainObject('drop zone options', Options) || {};
-    var Extras, TypesToAccept, HoldDelay;
+    var Extras, TypesToAccept;
     var onDroppableEnter, onDroppableMove, onDroppableLeave;
     var onDroppableHold, onDroppableRelease, onDrop;
+    var HoldDelay, onHold;
     Extras = Options.Extras;
     allowPlainObject('data types to be accepted', Options.TypesToAccept);
     TypesToAccept = Object.create(null);
@@ -538,17 +541,17 @@ function parsedDropZoneOptions(Options) {
             TypesToAccept[Type] = parsedOperations('list of accepted operations for type ' + quoted(Type), Options.TypesToAccept[Type]);
         }
     }
-    HoldDelay = allowedIntegerInRange('min. time to hold', Options.HoldDelay, 0);
     onDroppableEnter = allowedFunction('"onDroppableEnter" handler', Options.onDroppableEnter);
     onDroppableMove = allowedFunction('"onDroppableMove" handler', Options.onDroppableMove);
     onDroppableLeave = allowedFunction('"onDroppableLeave" handler', Options.onDroppableLeave);
     onDroppableHold = allowedFunction('"onDroppableHold" handler', Options.onDroppableHold);
     onDroppableRelease = allowedFunction('"onDroppableRelease" handler', Options.onDroppableRelease);
     onDrop = allowedFunction('"onDrop" handler', Options.onDrop);
+    HoldDelay = allowedIntegerInRange('min. time to hold', Options.HoldDelay, 0);
+    onHold = allowedFunction('"onHold" handler', Options.onHold);
     return {
         Extras: Extras,
         TypesToAccept: TypesToAccept,
-        HoldDelay: HoldDelay,
         // @ts-ignore we cannot validate given functions any further
         onDroppableEnter: onDroppableEnter,
         onDroppableMove: onDroppableMove,
@@ -556,7 +559,10 @@ function parsedDropZoneOptions(Options) {
         // @ts-ignore we cannot validate given functions any further
         onDroppableHold: onDroppableHold,
         onDroppableRelease: onDroppableRelease,
-        onDrop: onDrop
+        onDrop: onDrop,
+        // @ts-ignore we cannot validate given functions any further
+        HoldDelay: HoldDelay,
+        onHold: onHold
     };
 }
 /**** use:asDropZone={options} ****/
@@ -565,11 +571,17 @@ function asDropZone(Element, Options) {
     currentDropZoneOptions = parsedDropZoneOptions(Options);
     /**** enteredByDroppable ****/
     function enteredByDroppable(originalEvent) {
+        var Options = currentDropZoneOptions;
+        var DropZonePosition = asPosition(Conversion.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, Element)); // relative to DropZone element
+        if (ValueIsNumber(Options.HoldDelay) && (Options.HoldDelay > 0) &&
+            !Context.HoldWasTriggered) {
+            Context.HoldPosition = DropZonePosition;
+            Context.HoldTimer = setTimeout(triggerHold, Options.HoldDelay);
+        }
         if ((originalEvent.dataTransfer == null) ||
             (originalEvent.dataTransfer.effectAllowed === 'none')) {
             return;
         }
-        var Options = currentDropZoneOptions;
         var wantedOperation = originalEvent.dataTransfer.dropEffect;
         if (wantedOperation === 'none') { // workaround for browser bug
             switch (originalEvent.dataTransfer.effectAllowed) {
@@ -591,7 +603,6 @@ function asDropZone(Element, Options) {
         if (offeredTypeList.length === 0) {
             return;
         }
-        var DropZonePosition = asPosition(Conversion.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, Element)); // relative to DropZone element
         var accepted = ResultOfHandler('onDroppableEnter', Options, DropZonePosition.x, DropZonePosition.y, wantedOperation, offeredTypeList, Context.currentDroppableExtras, Options.Extras);
         if (accepted === false) { // i.e. explicit "false" result required
             return;
@@ -607,6 +618,18 @@ function asDropZone(Element, Options) {
     }
     /**** hoveredByDroppable ****/
     function hoveredByDroppable(originalEvent) {
+        var Options = currentDropZoneOptions;
+        var DropZonePosition = asPosition(Conversion.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, Element)); // relative to DropZone element
+        if (ValueIsNumber(Options.HoldDelay) && (Options.HoldDelay > 0) &&
+            !Context.HoldWasTriggered) {
+            var Offset = (Math.pow((Context.HoldPosition.x - DropZonePosition.x), 2) +
+                Math.pow((Context.HoldPosition.y - DropZonePosition.y), 2));
+            if (Offset > 25) {
+                Context.HoldPosition = DropZonePosition;
+                clearTimeout(Context.HoldTimer);
+                Context.HoldTimer = setTimeout(triggerHold, Options.HoldDelay);
+            }
+        }
         if ((originalEvent.dataTransfer == null) ||
             (originalEvent.dataTransfer.effectAllowed === 'none') ||
             (Context.currentDropZoneElement != null) && (Context.currentDropZoneElement !== Element)) {
@@ -614,7 +637,6 @@ function asDropZone(Element, Options) {
             return;
         }
         // in some browsers, it may be that (currentDropZone !== Element)!
-        var Options = currentDropZoneOptions;
         var wantedOperation = originalEvent.dataTransfer.dropEffect;
         if (wantedOperation === 'none') { // workaround for browser bug
             switch (originalEvent.dataTransfer.effectAllowed) {
@@ -642,7 +664,7 @@ function asDropZone(Element, Options) {
             Element.classList.remove('hovered');
             return;
         }
-        Context.currentDropZonePosition = asPosition(Conversion.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, Element)); // relative to DropZone element
+        Context.currentDropZonePosition = DropZonePosition;
         var accepted = ResultOfHandler('onDroppableMove', Options, Context.currentDropZonePosition.x, Context.currentDropZonePosition.y, wantedOperation, offeredTypeList, Context.currentDroppableExtras, Options.Extras);
         if (accepted === false) { // i.e. explicit "false" result required
             Context.currentDropZoneExtras = undefined;
@@ -663,6 +685,12 @@ function asDropZone(Element, Options) {
     /**** leftByDroppable ****/
     function leftByDroppable(originalEvent) {
         Element.classList.remove('hovered');
+        delete Context.HoldPosition;
+        if (Context.HoldTimer != null) {
+            clearTimeout(Context.HoldTimer);
+            delete Context.HoldTimer;
+        }
+        delete Context.HoldWasTriggered;
         var Options = currentDropZoneOptions;
         if (Context.currentDropZoneElement === Element) {
             if (Context.currentTypeTransferred == null) { // see explanation below
@@ -681,6 +709,12 @@ function asDropZone(Element, Options) {
     /**** droppedByDroppable ****/
     function droppedByDroppable(originalEvent) {
         Element.classList.remove('hovered');
+        delete Context.HoldPosition;
+        if (Context.HoldTimer != null) {
+            clearTimeout(Context.HoldTimer);
+            delete Context.HoldTimer;
+        }
+        delete Context.HoldWasTriggered;
         if ((originalEvent.dataTransfer == null) ||
             (originalEvent.dataTransfer.effectAllowed === 'none') ||
             (Context.currentDropZoneElement !== Element)) {
@@ -745,6 +779,14 @@ function asDropZone(Element, Options) {
             //        invokeHandler('onDroppableLeave', Options, currentDroppableExtras, Options.Extras)
         }
         Context.currentDropZoneElement = undefined;
+    }
+    /**** triggerHold ****/
+    function triggerHold() {
+        var DropZonePosition = Context.currentDropZonePosition || Context.HoldPosition;
+        delete Context.HoldPosition;
+        delete Context.HoldTimer;
+        Context.HoldWasTriggered = true;
+        invokeHandler('onHold', Options, DropZonePosition.x, DropZonePosition.y, Context.currentDroppableExtras, Options.Extras);
     }
     /**** updateDropZoneOptions ****/
     function updateDropZoneOptions(Options) {
