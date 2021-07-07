@@ -527,10 +527,9 @@ function asDroppable(Element, Options) {
 /**** parsedDropZoneOptions ****/
 function parsedDropZoneOptions(Options) {
     Options = allowedPlainObject('drop zone options', Options) || {};
-    var Extras, TypesToAccept;
+    var Extras, TypesToAccept, HoldDelay;
     var onDroppableEnter, onDroppableMove, onDroppableLeave;
     var onDroppableHold, onDroppableRelease, onDrop;
-    var HoldDelay, onHold;
     Extras = Options.Extras;
     allowPlainObject('data types to be accepted', Options.TypesToAccept);
     TypesToAccept = Object.create(null);
@@ -541,17 +540,17 @@ function parsedDropZoneOptions(Options) {
             TypesToAccept[Type] = parsedOperations('list of accepted operations for type ' + quoted(Type), Options.TypesToAccept[Type]);
         }
     }
+    HoldDelay = allowedIntegerInRange('min. time to hold', Options.HoldDelay, 0);
     onDroppableEnter = allowedFunction('"onDroppableEnter" handler', Options.onDroppableEnter);
     onDroppableMove = allowedFunction('"onDroppableMove" handler', Options.onDroppableMove);
     onDroppableLeave = allowedFunction('"onDroppableLeave" handler', Options.onDroppableLeave);
     onDroppableHold = allowedFunction('"onDroppableHold" handler', Options.onDroppableHold);
     onDroppableRelease = allowedFunction('"onDroppableRelease" handler', Options.onDroppableRelease);
     onDrop = allowedFunction('"onDrop" handler', Options.onDrop);
-    HoldDelay = allowedIntegerInRange('min. time to hold', Options.HoldDelay, 0);
-    onHold = allowedFunction('"onHold" handler', Options.onHold);
     return {
         Extras: Extras,
         TypesToAccept: TypesToAccept,
+        HoldDelay: HoldDelay,
         // @ts-ignore we cannot validate given functions any further
         onDroppableEnter: onDroppableEnter,
         onDroppableMove: onDroppableMove,
@@ -560,9 +559,6 @@ function parsedDropZoneOptions(Options) {
         onDroppableHold: onDroppableHold,
         onDroppableRelease: onDroppableRelease,
         onDrop: onDrop,
-        // @ts-ignore we cannot validate given functions any further
-        HoldDelay: HoldDelay,
-        onHold: onHold
     };
 }
 /**** use:asDropZone={options} ****/
@@ -786,7 +782,7 @@ function asDropZone(Element, Options) {
         delete Context.HoldPosition;
         delete Context.HoldTimer;
         Context.HoldWasTriggered = true;
-        invokeHandler('onHold', Options, DropZonePosition.x, DropZonePosition.y, Context.currentDroppableExtras, Options.Extras);
+        invokeHandler('onDroppableHold', Options, DropZonePosition.x, DropZonePosition.y, Context.currentDroppableExtras, Options.Extras);
     }
     /**** updateDropZoneOptions ****/
     function updateDropZoneOptions(Options) {
