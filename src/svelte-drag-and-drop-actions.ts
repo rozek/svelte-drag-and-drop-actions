@@ -774,6 +774,7 @@
   type DropZoneOptions = {
     Extras?:any,
     TypesToAccept?:TypeAcceptanceSet,
+    HoldDelay?:number,
     onDroppableEnter?:(x:number,y:number, Operation:DropOperation, offeredTypeList:string[],
                         DroppableExtras:any, DropZoneExtras:any) => boolean|undefined,
     onDroppableMove?: (x:number,y:number, Operation:DropOperation, offeredTypeList:string[],
@@ -782,9 +783,6 @@
     onDroppableLeave?:(DroppableExtras:any, DropZoneExtras:any) => void,
     onDrop?:          (x:number,y:number, Operation:DropOperation, DataOffered:any,
                         DroppableExtras:any, DropZoneExtras:any) => string | undefined,
-
-    HoldDelay?:number,
-    onHold?:(x:number,y:number, DroppableExtras:any, DropZoneExtras:any) => void,
   }
 
 /**** parsedDropZoneOptions ****/
@@ -792,10 +790,9 @@
   function parsedDropZoneOptions (Options:any):DropZoneOptions {
     Options = allowedPlainObject('drop zone options',Options) || {}
 
-    let Extras:any, TypesToAccept:TypeAcceptanceSet
+    let Extras:any, TypesToAccept:TypeAcceptanceSet, HoldDelay:number
     let onDroppableEnter:Function, onDroppableMove:Function, onDroppableLeave:Function
     let onDroppableHold:Function, onDroppableRelease:Function, onDrop:Function
-    let HoldDelay:number, onHold:Function
 
     Extras = Options.Extras
 
@@ -813,6 +810,8 @@
           )
         }
       }
+    HoldDelay = allowedIntegerInRange('min. time to hold',Options.HoldDelay, 0) as number
+
     onDroppableEnter   = allowedFunction('"onDroppableEnter" handler',  Options.onDroppableEnter)
     onDroppableMove    = allowedFunction('"onDroppableMove" handler',   Options.onDroppableMove)
     onDroppableLeave   = allowedFunction('"onDroppableLeave" handler',  Options.onDroppableLeave)
@@ -820,17 +819,12 @@
     onDroppableRelease = allowedFunction('"onDroppableRelease" handler',Options.onDroppableRelease)
     onDrop             = allowedFunction('"onDrop" handler',            Options.onDrop)
 
-    HoldDelay = allowedIntegerInRange('min. time to hold',Options.HoldDelay, 0) as number
-    onHold    = allowedFunction       ('"onHold" handler',Options.onHold)
-
     return {
-      Extras, TypesToAccept,
+      Extras, TypesToAccept, HoldDelay,
 // @ts-ignore we cannot validate given functions any further
       onDroppableEnter, onDroppableMove, onDroppableLeave,
 // @ts-ignore we cannot validate given functions any further
       onDroppableHold, onDroppableRelease, onDrop,
-// @ts-ignore we cannot validate given functions any further
-      HoldDelay, onHold
     }
   }
 
@@ -1135,7 +1129,7 @@
       Context.HoldWasTriggered = true
 
       invokeHandler(
-        'onHold', Options,
+        'onDroppableHold', Options,
         (DropZonePosition as Position).x, (DropZonePosition as Position).y,
         Context.currentDroppableExtras, Options.Extras
       )
