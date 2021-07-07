@@ -570,9 +570,8 @@ function asDropZone(Element, Options) {
         var Options = currentDropZoneOptions;
         var DropZonePosition = asPosition(Conversion.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, Element)); // relative to DropZone element
         if (ValueIsNumber(Options.HoldDelay) && (Options.HoldDelay > 0) &&
-            !Context.HoldWasTriggered) {
-            Context.HoldPosition = DropZonePosition;
-            Context.HoldTimer = setTimeout(triggerHold, Options.HoldDelay);
+            (Context.HoldWasTriggeredForElement !== Element)) {
+            startHoldTimer(DropZonePosition);
         }
         if ((originalEvent.dataTransfer == null) ||
             (originalEvent.dataTransfer.effectAllowed === 'none')) {
@@ -613,17 +612,17 @@ function asDropZone(Element, Options) {
         }
     }
     /**** hoveredByDroppable ****/
+    // warning: I've already seen leftByDroppable followed by hoveredByDropable!
     function hoveredByDroppable(originalEvent) {
         var Options = currentDropZoneOptions;
         var DropZonePosition = asPosition(Conversion.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, Element)); // relative to DropZone element
         if (ValueIsNumber(Options.HoldDelay) && (Options.HoldDelay > 0) &&
-            !Context.HoldWasTriggered) {
-            var Offset = (Math.pow((Context.HoldPosition.x - DropZonePosition.x), 2) +
-                Math.pow((Context.HoldPosition.y - DropZonePosition.y), 2));
-            if (Offset > 25) {
-                Context.HoldPosition = DropZonePosition;
-                clearTimeout(Context.HoldTimer);
-                Context.HoldTimer = setTimeout(triggerHold, Options.HoldDelay);
+            (Context.HoldWasTriggeredForElement !== Element)) {
+            if (Context.HoldPosition == null) { // see above for reasoning
+                startHoldTimer(DropZonePosition);
+            }
+            else {
+                continueHoldTimer(DropZonePosition);
             }
         }
         if ((originalEvent.dataTransfer == null) ||
@@ -681,12 +680,7 @@ function asDropZone(Element, Options) {
     /**** leftByDroppable ****/
     function leftByDroppable(originalEvent) {
         Element.classList.remove('hovered');
-        delete Context.HoldPosition;
-        if (Context.HoldTimer != null) {
-            clearTimeout(Context.HoldTimer);
-            delete Context.HoldTimer;
-        }
-        delete Context.HoldWasTriggered;
+        stopHoldTimer();
         var Options = currentDropZoneOptions;
         if (Context.currentDropZoneElement === Element) {
             if (Context.currentTypeTransferred == null) { // see explanation below
@@ -705,12 +699,7 @@ function asDropZone(Element, Options) {
     /**** droppedByDroppable ****/
     function droppedByDroppable(originalEvent) {
         Element.classList.remove('hovered');
-        delete Context.HoldPosition;
-        if (Context.HoldTimer != null) {
-            clearTimeout(Context.HoldTimer);
-            delete Context.HoldTimer;
-        }
-        delete Context.HoldWasTriggered;
+        stopHoldTimer();
         if ((originalEvent.dataTransfer == null) ||
             (originalEvent.dataTransfer.effectAllowed === 'none') ||
             (Context.currentDropZoneElement !== Element)) {
@@ -776,12 +765,40 @@ function asDropZone(Element, Options) {
         }
         Context.currentDropZoneElement = undefined;
     }
+    /**** startHoldTimer ****/
+    function startHoldTimer(DropZonePosition) {
+        Context.HoldPosition = DropZonePosition;
+        if (Context.HoldTimer != null) {
+            clearTimeout(Context.HoldTimer);
+        }
+        Context.HoldTimer = setTimeout(triggerHold, Options.HoldDelay);
+    }
+    /**** continueHoldTimer ****/
+    function continueHoldTimer(DropZonePosition) {
+        var Offset = (Math.pow((Context.HoldPosition.x - DropZonePosition.x), 2) +
+            Math.pow((Context.HoldPosition.y - DropZonePosition.y), 2));
+        if (Offset > 25) {
+            Context.HoldPosition = DropZonePosition;
+            clearTimeout(Context.HoldTimer);
+            Context.HoldTimer = setTimeout(triggerHold, Options.HoldDelay);
+        }
+    }
+    /**** stopHoldTimer ****/
+    function stopHoldTimer() {
+        delete Context.HoldPosition;
+        if (Context.HoldTimer != null) {
+            clearTimeout(Context.HoldTimer);
+            delete Context.HoldTimer;
+        }
+        delete Context.HoldWasTriggeredForElement;
+    }
     /**** triggerHold ****/
     function triggerHold() {
-        var DropZonePosition = Context.currentDropZonePosition || Context.HoldPosition;
+        var DropZonePosition = ( // sometimes, there is no "enteredByDroppable"
+        Context.currentDropZonePosition || Context.HoldPosition);
         delete Context.HoldPosition;
         delete Context.HoldTimer;
-        Context.HoldWasTriggered = true;
+        Context.HoldWasTriggeredForElement = Element;
         invokeHandler('onDroppableHold', Options, DropZonePosition.x, DropZonePosition.y, Context.currentDroppableExtras, Options.Extras);
     }
     /**** updateDropZoneOptions ****/
