@@ -68,7 +68,7 @@ Svelte is a Framework for building *reactive* applications, i.e. it assumes, tha
 
 Combined with a rather declarative API (designed with the most common use cases in mind), such an approach leads to a lightweight and easily usable module which still offers programmers full control over the actual side-effects of dragging (and dropping)
 
-If this sounds too abstract, just have a look into the examples: many of them illustrate specific use cases and may therefore serve as a basis for your own development.
+If this sounds too abstract, just have a look at the [examples](#examples): many of them illustrate specific use cases and may therefore serve as a basis for your own development.
 
 **Nota bene**: since it is based on native HTML5 drag-and-drop, `svelte-drag-and-drop-actions` principally also allows dragging and dropping between multiple windows (or tabs) of the same browser or even between browsers. To what extent this works, depends on the participating browsers, the data types involved (transferring text often works best), and may also depend on the operating system used.
 
@@ -202,7 +202,7 @@ While being hovered by a droppable whose data offered is at least partially acce
 * [dragging an existing dummy](https://svelte.dev/repl/ee2a354b389049fa87da061ab7731c53) - drags a dummy built from an existing HTML element (which must be visible, however)
 * [dragging an ad-hoc dummy](https://svelte.dev/repl/65a48616a12f4cd18bca6fed83cb2088) - demonstrates how to dynamically create a drag image for a draggable
 * [plain dragging from a handle](https://svelte.dev/repl/83e4a79911f243f0b618fd25eece9d39) - illustrates dragging from a given handle rather than the whole draggable
-* [plain dragging with panning](https://svelte.dev/repl/70d99ffcd0494eac871e5ce68198bd4d) - demonstrates autoamtic scrolling while a Draggable is dragged over a scrollable container
+* [plain dragging with panning](https://svelte.dev/repl/70d99ffcd0494eac871e5ce68198bd4d) - demonstrates automatic scrolling while a Draggable is dragged over a scrollable container
 * [plain draggable Button](https://svelte.dev/repl/ba1d1ce67c0b40439ea5e3015d6d36bf) - drags a button which remains clickable
 * [plain draggable Note](https://svelte.dev/repl/03727e9474614e678b23fdaa1cbf5003) - drags a "note", but only from its title bar
 * [plain draggable resizable Note](https://svelte.dev/repl/86663312b0034250943904ed537feff8) - adds a "resize" handle to the draggable note
