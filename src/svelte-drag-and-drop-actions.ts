@@ -279,7 +279,10 @@
       } else {
         PositioningWasDelayed = false
 
-        performPanningFor(Element, Options, originalEvent.pageX,originalEvent.pageY)
+        performPanningFor(
+          'draggable',
+          Element, Options, originalEvent.pageX,originalEvent.pageY
+        )
 
         let relativePosition = Conversion.fromDocumentTo(
           'local', { left:originalEvent.pageX, top:originalEvent.pageY }, PositionReference
@@ -445,6 +448,8 @@
     HoldPosition?:Position,               // current position to compare against
     HoldTimer?:any,
     HoldWasTriggeredForElement?:HTMLElement | SVGElement,
+
+    DropZonePanning?:boolean
   }                                           // because we trigger it once only
 
 //-------------------------------------------------------------------------------
@@ -654,7 +659,10 @@
       } else {
         PositioningWasDelayed = false
 
-        performPanningFor(Element, Options, originalEvent.pageX,originalEvent.pageY)
+        performPanningFor(
+          'draggable',
+          Element, Options, originalEvent.pageX,originalEvent.pageY
+        )
 
         let relativePosition = Conversion.fromDocumentTo(
           'local', { left:originalEvent.pageX, top:originalEvent.pageY }, PositionReference
@@ -815,6 +823,8 @@
     Extras?:any,
     TypesToAccept?:TypeAcceptanceSet,
     HoldDelay?:number,
+    Pannable?:string|'this'|HTMLElement|SVGElement,
+    PanSensorWidth?:number, PanSensorHeight?:number, PanSpeed?:number,
     onDroppableEnter?:(x:number,y:number, Operation:DropOperation, offeredTypeList:string[],
                         DroppableExtras:any, DropZoneExtras:any) => boolean|undefined,
     onDroppableMove?: (x:number,y:number, Operation:DropOperation, offeredTypeList:string[],
@@ -831,6 +841,8 @@
     Options = allowedPlainObject('drop zone options',Options) || {}
 
     let Extras:any, TypesToAccept:TypeAcceptanceSet, HoldDelay:number
+    let Pannable:string|'this'|HTMLElement|SVGElement|undefined
+    let PanSensorWidth:number, PanSensorHeight:number, PanSpeed:number
     let onDroppableEnter:Function, onDroppableMove:Function, onDroppableLeave:Function
     let onDroppableHold:Function, onDroppableRelease:Function, onDrop:Function
 
@@ -852,6 +864,27 @@
       }
     HoldDelay = allowedIntegerInRange('min. time to hold',Options.HoldDelay, 0) as number
 
+    switch (true) {
+      case (Options.Pannable == null):
+        Pannable = undefined; break
+      case (Options.Pannable === 'this'):
+      case ValueIsNonEmptyString(Options.Pannable):
+      case (Options.Pannable instanceof HTMLElement):
+      case (Options.Pannable instanceof SVGElement):
+//    case (Options.Pannable instanceof MathMLElement):
+        Pannable = Options.Pannable; break
+      default: throwError(
+        'InvalidArgument: invalid "Pannable" specification given'
+      )
+    }
+
+    PanSensorWidth  = allowedOrdinal ('panning sensor width',Options.PanSensorWidth)
+      if (PanSensorWidth  == null) { PanSensorWidth = 20 }
+    PanSensorHeight = allowedOrdinal('panning sensor height',Options.PanSensorHeight)
+      if (PanSensorHeight == null) { PanSensorHeight = 20 }
+    PanSpeed        = allowedOrdinal        ('panning speed',Options.PanSpeed)
+      if (PanSpeed == null) { PanSpeed = 10 }
+
     onDroppableEnter   = allowedFunction('"onDroppableEnter" handler',  Options.onDroppableEnter)
     onDroppableMove    = allowedFunction('"onDroppableMove" handler',   Options.onDroppableMove)
     onDroppableLeave   = allowedFunction('"onDroppableLeave" handler',  Options.onDroppableLeave)
@@ -861,6 +894,7 @@
 
     return {
       Extras, TypesToAccept, HoldDelay,
+      Pannable, PanSensorWidth,PanSensorHeight, PanSpeed,
 // @ts-ignore we cannot validate given functions any further
       onDroppableEnter, onDroppableMove, onDroppableLeave,
 // @ts-ignore we cannot validate given functions any further
@@ -881,6 +915,11 @@
 
     function enteredByDroppable (originalEvent:DragEvent) {
       let Options = currentDropZoneOptions
+
+      performPanningFor(
+        'dropzone',
+        Element, Options, originalEvent.pageX,originalEvent.pageY
+      )
 
       let DropZonePosition = asPosition(Conversion.fromDocumentTo(
         'local', { left:originalEvent.pageX, top:originalEvent.pageY }, Element
@@ -938,6 +977,11 @@
 
     function hoveredByDroppable (originalEvent:DragEvent) {
       let Options = currentDropZoneOptions
+
+      performPanningFor(
+        'dropzone',
+        Element, Options, originalEvent.pageX,originalEvent.pageY
+      )
 
       let DropZonePosition = asPosition(Conversion.fromDocumentTo(
         'local', { left:originalEvent.pageX, top:originalEvent.pageY }, Element
@@ -1023,6 +1067,7 @@
 
     function leftByDroppable (originalEvent:DragEvent) {
       Element.classList.remove('hovered')
+      Context.DropZonePanning = false
 
       stopHoldTimer()
 
@@ -1050,6 +1095,7 @@
 
     function droppedByDroppable (originalEvent:DragEvent) {
       Element.classList.remove('hovered')
+      Context.DropZonePanning = false
 
       stopHoldTimer()
 
@@ -1209,6 +1255,11 @@
       currentDropZoneOptions.TypesToAccept = Options.TypesToAccept
 
       currentDropZoneOptions.HoldDelay = Options.HoldDelay
+
+      currentDropZoneOptions.Pannable        = Options.Pannable
+      currentDropZoneOptions.PanSensorWidth  = Options.PanSensorWidth
+      currentDropZoneOptions.PanSensorHeight = Options.PanSensorHeight
+      currentDropZoneOptions.PanSpeed        = Options.PanSpeed
     }
 
     Element.setAttribute('draggable','true')
@@ -1328,25 +1379,35 @@
   /**** performPanningFor ****/
 
     function performPanningFor (
+      Type:'draggable'|'dropzone',
       Element:HTMLElement | SVGElement, Options:DraggableOptions,
       xOnPage:number,yOnPage:number
     ):void {
+      if ((Type === 'draggable') && Context.DropZonePanning) { return }
+
       if (
         (Options.Pannable == null) ||
         ((Options.PanSensorWidth === 0) && (Options.PanSensorHeight === 0)) ||
         (Options.PanSpeed === 0)
-      ) { return }
+      ) { Context.DropZonePanning = false; return }
 
       let pannableElement:Element|undefined|null
-        if (ValueIsString(Options.Pannable)) {
-          pannableElement = Element.parentElement
-          if (pannableElement != null) {
-            pannableElement = pannableElement.closest(Options.Pannable as string)
-          }
-        } else {
-          pannableElement = Options.Pannable as HTMLElement
+        switch (true) {
+          case ValueIsNonEmptyString(Options.Pannable):
+            pannableElement = Element.parentElement
+            if (pannableElement != null) {
+              pannableElement = pannableElement.closest(Options.Pannable as string)
+            }
+            break
+          case (Options.Pannable === 'this') && (Type === 'dropzone'):
+            pannableElement = Element
+            break
+          case (Options.Pannable instanceof HTMLElement):
+          case (Options.Pannable instanceof SVGElement):
+//        case (Options.Pannable instanceof MathMLElement):
+            pannableElement = Options.Pannable as HTMLElement
         }
-      if (pannableElement == null) { return }
+      if (pannableElement == null) { Context.DropZonePanning = false; return }
 
       let { left:xInPannable, top:yInPannable } = Conversion.fromDocumentTo(
         'local', { left:xOnPage, top:yOnPage }, pannableElement
@@ -1385,6 +1446,8 @@
           pannableElement.scrollHeight-PannableHeight
         )
       }
+
+      Context.DropZonePanning = (Type === 'dropzone')
     }
 
 /**** parsedOperations ****/
