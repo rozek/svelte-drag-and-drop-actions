@@ -53,6 +53,10 @@ declare type DropZoneOptions = {
     Extras?: any;
     TypesToAccept?: TypeAcceptanceSet;
     HoldDelay?: number;
+    Pannable?: string | 'this' | HTMLElement | SVGElement;
+    PanSensorWidth?: number;
+    PanSensorHeight?: number;
+    PanSpeed?: number;
     onDroppableEnter?: (x: number, y: number, Operation: DropOperation, offeredTypeList: string[], DroppableExtras: any, DropZoneExtras: any) => boolean | undefined;
     onDroppableMove?: (x: number, y: number, Operation: DropOperation, offeredTypeList: string[], DroppableExtras: any, DropZoneExtras: any) => boolean | undefined;
     onDroppableHold?: (x: number, y: number, DroppableExtras: any, DropZoneExtras: any) => void;
