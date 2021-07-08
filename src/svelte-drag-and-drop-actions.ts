@@ -646,8 +646,6 @@
         {}, currentDraggableOptions, currentDroppableOptions
       )
 
-      performPanningFor(Element, Options, originalEvent.pageX,originalEvent.pageY)
-
       if (
         (originalEvent.screenX === 0) && (originalEvent.screenY === 0) &&
         ! PositioningWasDelayed
@@ -655,6 +653,8 @@
         PositioningWasDelayed = true // last "drag" event contains wrong coord.s
       } else {
         PositioningWasDelayed = false
+
+        performPanningFor(Element, Options, originalEvent.pageX,originalEvent.pageY)
 
         let relativePosition = Conversion.fromDocumentTo(
           'local', { left:originalEvent.pageX, top:originalEvent.pageY }, PositionReference
