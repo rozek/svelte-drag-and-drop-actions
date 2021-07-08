@@ -462,13 +462,13 @@ function asDroppable(Element, Options) {
             return false;
         }
         var Options = Object.assign({}, currentDraggableOptions, currentDroppableOptions);
-        performPanningFor(Element, Options, originalEvent.pageX, originalEvent.pageY);
         if ((originalEvent.screenX === 0) && (originalEvent.screenY === 0) &&
             !PositioningWasDelayed) {
             PositioningWasDelayed = true; // last "drag" event contains wrong coord.s
         }
         else {
             PositioningWasDelayed = false;
+            performPanningFor(Element, Options, originalEvent.pageX, originalEvent.pageY);
             var relativePosition = Conversion.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, PositionReference); // relative to reference element
             var x = relativePosition.left + ReferenceDeltaX; // in user coordinates
             var y = relativePosition.top + ReferenceDeltaY;
