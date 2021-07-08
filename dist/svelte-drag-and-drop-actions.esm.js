@@ -1,4 +1,4 @@
-import { global, allowedPlainObject, throwError, ValueIsNonEmptyString, allowedNonEmptyString, ValueIsFunction, allowedFiniteNumber, ValueIsPlainObject, ValueIsFiniteNumber, allowedFunction, constrained, ValueIsString, ObjectIsNotEmpty, allowPlainObject, quoted, allowedIntegerInRange, ValueIsNumber, ValueIsOneOf, allowedString, allowListSatisfying } from 'javascript-interface-library';
+import { global, allowedPlainObject, throwError, ValueIsNonEmptyString, allowedNonEmptyString, ValueIsFunction, allowedFiniteNumber, allowedOrdinal, ValueIsPlainObject, ValueIsFiniteNumber, allowedFunction, constrained, ValueIsString, ObjectIsNotEmpty, allowPlainObject, quoted, allowedIntegerInRange, ValueIsNumber, ValueIsOneOf, allowedString, allowListSatisfying } from 'javascript-interface-library';
 import Conversion from 'svelte-coordinate-conversion';
 
 //----------------------------------------------------------------------------//
@@ -13,6 +13,8 @@ function parsedDraggableOptions(Options) {
     var onlyFrom, neverFrom;
     var Dummy, DummyOffsetX, DummyOffsetY;
     var minX, minY, maxX, maxY;
+    var Pannable;
+    var PanSensorWidth, PanSensorHeight, PanSpeed;
     var onDragStart, onDragMove, onDragEnd, onDragCancel;
     Extras = Options.Extras;
     switch (true) {
@@ -64,6 +66,30 @@ function parsedDraggableOptions(Options) {
     if (maxY == null) {
         maxY = Infinity;
     }
+    switch (true) {
+        case (Options.Pannable == null):
+            Pannable = undefined;
+            break;
+        case ValueIsNonEmptyString(Options.Pannable):
+        case (Options.Pannable instanceof HTMLElement):
+        case (Options.Pannable instanceof SVGElement):
+            //    case (Options.Pannable instanceof MathMLElement):
+            Pannable = Options.Pannable;
+            break;
+        default: throwError('InvalidArgument: invalid "Pannable" specification given');
+    }
+    PanSensorWidth = allowedOrdinal('panning sensor width', Options.PanSensorWidth);
+    if (PanSensorWidth == null) {
+        PanSensorWidth = 20;
+    }
+    PanSensorHeight = allowedOrdinal('panning sensor height', Options.PanSensorHeight);
+    if (PanSensorHeight == null) {
+        PanSensorHeight = 20;
+    }
+    PanSpeed = allowedOrdinal('panning speed', Options.PanSpeed);
+    if (PanSpeed == null) {
+        PanSpeed = 10;
+    }
     if (ValueIsPosition(Options.onDragStart)) {
         var _a = Options.onDragStart, x_1 = _a.x, y_1 = _a.y;
         onDragStart = function () { return ({ x: x_1, y: y_1 }); };
@@ -85,6 +111,10 @@ function parsedDraggableOptions(Options) {
         minY: minY,
         maxX: maxX,
         maxY: maxY,
+        Pannable: Pannable,
+        PanSensorWidth: PanSensorWidth,
+        PanSensorHeight: PanSensorHeight,
+        PanSpeed: PanSpeed,
         // @ts-ignore we cannot validate given functions any further
         onDragStart: onDragStart,
         onDragMove: onDragMove,
@@ -190,6 +220,7 @@ function asDraggable(Element, Options) {
         }
         else {
             PositioningWasDelayed = false;
+            performPanningFor(Element, Options, originalEvent.pageX, originalEvent.pageY);
             var relativePosition = Conversion.fromDocumentTo('local', { left: originalEvent.pageX, top: originalEvent.pageY }, PositionReference); // relative to reference element
             var x = relativePosition.left + ReferenceDeltaX; // in user coordinates
             var y = relativePosition.top + ReferenceDeltaY;
@@ -231,6 +262,10 @@ function asDraggable(Element, Options) {
         currentDraggableOptions.minY = Options.minY;
         currentDraggableOptions.maxX = Options.maxX;
         currentDraggableOptions.maxY = Options.maxY;
+        currentDraggableOptions.Pannable = Options.Pannable;
+        currentDraggableOptions.PanSensorWidth = Options.PanSensorWidth;
+        currentDraggableOptions.PanSensorHeight = Options.PanSensorHeight;
+        currentDraggableOptions.PanSpeed = Options.PanSpeed;
         currentDraggableOptions.onDragStart = (Options.onDragStart || currentDraggableOptions.onDragStart); // may be used to update initial position for subsequent drags
     }
     Element.setAttribute('draggable', 'true');
@@ -427,6 +462,7 @@ function asDroppable(Element, Options) {
             return false;
         }
         var Options = Object.assign({}, currentDraggableOptions, currentDroppableOptions);
+        performPanningFor(Element, Options, originalEvent.pageX, originalEvent.pageY);
         if ((originalEvent.screenX === 0) && (originalEvent.screenY === 0) &&
             !PositioningWasDelayed) {
             PositioningWasDelayed = true; // last "drag" event contains wrong coord.s
@@ -502,6 +538,10 @@ function asDroppable(Element, Options) {
         currentDraggableOptions.minY = Options.minY;
         currentDraggableOptions.maxX = Options.maxX;
         currentDraggableOptions.maxY = Options.maxY;
+        currentDraggableOptions.Pannable = Options.Pannable;
+        currentDraggableOptions.PanSensorWidth = Options.PanSensorWidth;
+        currentDraggableOptions.PanSensorHeight = Options.PanSensorHeight;
+        currentDraggableOptions.PanSpeed = Options.PanSpeed;
         currentDraggableOptions.onDragStart = (Options.onDragStart || currentDraggableOptions.onDragStart); // may be used to update initial position for subsequent drags
     }
     /**** updateDroppableOptions ****/
@@ -804,15 +844,11 @@ function asDropZone(Element, Options) {
     /**** updateDropZoneOptions ****/
     function updateDropZoneOptions(Options) {
         Options = parsedDropZoneOptions(Options);
-        if (Options.Extras != null) {
+        if ((currentDropZoneOptions.Extras == null) && (Options.Extras != null)) {
             currentDropZoneOptions.Extras = Options.Extras;
-        }
-        if (ObjectIsNotEmpty(Options.TypesToAccept)) {
-            currentDropZoneOptions.TypesToAccept = Options.TypesToAccept;
-        }
-        if (Options.HoldDelay != null) {
-            currentDropZoneOptions.HoldDelay = Options.HoldDelay;
-        }
+        } // Extras may be set with delay, but remain constant afterwards
+        currentDropZoneOptions.TypesToAccept = Options.TypesToAccept;
+        currentDropZoneOptions.HoldDelay = Options.HoldDelay;
     }
     Element.setAttribute('draggable', 'true');
     // @ts-ignore we know that the passed event is a DragEvent
@@ -899,6 +935,44 @@ function DragImageFor(Element, Options) {
                         'neither an HTML nor an SVG element');
                 }
             }
+    }
+}
+/**** performPanningFor ****/
+function performPanningFor(Element, Options, xOnPage, yOnPage) {
+    if ((Options.Pannable == null) ||
+        ((Options.PanSensorWidth === 0) && (Options.PanSensorHeight === 0)) ||
+        (Options.PanSpeed === 0)) {
+        return;
+    }
+    var pannableElement;
+    if (ValueIsString(Options.Pannable)) {
+        pannableElement = Element.parentElement;
+        if (pannableElement != null) {
+            pannableElement = pannableElement.closest(Options.Pannable);
+        }
+    }
+    else {
+        pannableElement = Options.Pannable;
+    }
+    if (pannableElement == null) {
+        return;
+    }
+    var _a = Conversion.fromDocumentTo('local', { left: xOnPage, top: yOnPage }, pannableElement), xInPannable = _a.left, yInPannable = _a.top;
+    if ((xInPannable >= 0) && (xInPannable < Options.PanSensorWidth)) {
+        pannableElement.scrollLeft = Math.max(0, pannableElement.scrollLeft - Options.PanSpeed);
+    }
+    var PannableWidth = pannableElement.clientWidth; // w/o scrollbar
+    if ((xInPannable >= PannableWidth - Options.PanSensorWidth) &&
+        (xInPannable < PannableWidth)) {
+        pannableElement.scrollLeft = Math.min(pannableElement.scrollLeft + Options.PanSpeed, pannableElement.scrollWidth - PannableWidth);
+    }
+    if ((yInPannable >= 0) && (yInPannable < Options.PanSensorHeight)) {
+        pannableElement.scrollTop = Math.max(0, pannableElement.scrollTop - Options.PanSpeed);
+    }
+    var PannableHeight = pannableElement.clientHeight; // w/o scrollbar
+    if ((yInPannable >= PannableHeight - Options.PanSensorHeight) &&
+        (yInPannable < PannableHeight)) {
+        pannableElement.scrollTop = Math.min(pannableElement.scrollTop + Options.PanSpeed, pannableElement.scrollHeight - PannableHeight);
     }
 }
 /**** parsedOperations ****/

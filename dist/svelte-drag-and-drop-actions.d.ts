@@ -17,6 +17,10 @@ declare type DraggableOptions = {
     minY?: number;
     maxX?: number;
     maxY?: number;
+    Pannable?: string | HTMLElement | SVGElement;
+    PanSensorWidth?: number;
+    PanSensorHeight?: number;
+    PanSpeed?: number;
     onDragStart?: Position | ((DraggableExtras: any) => Position);
     onDragMove?: (x: number, y: number, dx: number, dy: number, DraggableExtras: any) => void;
     onDragEnd?: (x: number, y: number, dx: number, dy: number, DraggableExtras: any) => void;
