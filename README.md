@@ -2,6 +2,21 @@
 
 a lightweight but flexible HTML5 Drag-and-Drop implemented as Svelte actions
 
+**Features:**
+
+* HTML5 drag-and-drop features remain available (see [example](https://svelte.dev/repl/da5c51729c974c8b950e8de4bdb7d1c5))
+* works on mobile devices<br>(when combined with [svelte-drag-drop-touch](https://github.com/rozek/svelte-drag-drop-touch))
+* supports custom drag images ([from existing DOM elements](https://svelte.dev/repl/ee2a354b389049fa87da061ab7731c53) or [from HTML markup](https://svelte.dev/repl/801170099918424c998f689a3c6b2ddc))
+* drag images may even be dynamically created (see [example](https://svelte.dev/repl/65a48616a12f4cd18bca6fed83cb2088))
+* supports simple dragging (i.e., without dropping, see [example](https://svelte.dev/repl/e779dd6b998a4c0ba94e417dd2a66c16))
+* provides mechanisms to reduce the code needed to implement element dragging (see [example](https://svelte.dev/repl/6e98523988f54335bf2e2307e79b4173))
+* can restrict dragging to a given region (see [example](https://svelte.dev/repl/6e98523988f54335bf2e2307e79b4173))
+* supports automatic scrolling (aka "panning") of partially visible elements while s.th. is dragged over them (see [example](https://svelte.dev/repl/70d99ffcd0494eac871e5ce68198bd4d)), works fine even on Chrome for desktop (which already provides panning out of the box)
+* can mimic *real* dragging of an element (and not just a "ghost image" while the original stands still, see [example](https://svelte.dev/repl/e779dd6b998a4c0ba94e417dd2a66c16))
+* can suppress the drag image at all (offering new possibilites - e.g., for lasso selection - using the same code base, see many of the examples, f.e. [this one](https://svelte.dev/repl/e9c64887e2684146acdc16e9af13193e))
+* supports dragging elements from a given handle only (instead of the whole element itself, see [example](https://svelte.dev/repl/86663312b0034250943904ed537feff8))
+* visual feedback of dragged elements and drop zones by simple styling (using dynamically assigned CSS classes, see several examples, such as [this one](https://svelte.dev/repl/601fe6818bdc48f487002c489024c0a8))
+
 HTML5 Drag-and-Drop allows web applications to provide a visual user interface for transfering data between HTML elements or exchanging data with a browser's environment. Using HTML5 Drag-and-Drop for the *operation* of an application (i.e. the repositioning, resizing or reordering of elements) is difficult and suffers from some browser-specific bugs.
 
 Instead of fully re-implementing the visual operation of web applications with mouse and touch gestures (as done in [agnostic-draggable](https://github.com/rozek/agnostic-draggable) or [svelte-dnd-action](https://github.com/isaacHagoel/svelte-dnd-action)), `svelte-drag-and-drop-actions` builds upon already existing HTML5 Drag-and-Drop functionality and simply extends it. The result is a lightweight package with a surprisingly simple programming interface. (And because this module is tree-shakable, using the plain dragging functionality only - i.e., without support for dropping - will reduce the import size even further)
