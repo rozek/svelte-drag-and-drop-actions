@@ -179,7 +179,6 @@ is the classical pattern for Svelte actions. `use:asDroppable` supports the foll
 
 While being dragged, the CSS class `dragged` is assigned to the draggable element (not the drag image!). It will be removed again as soon as dragging has ended.
 
-
 While over a drop zone which accepts (some of) the data offered, the CSS class `droppable` is assigned to the draggable element (not the drag image!). It will be removed again as soon as dragging has ended or the droppable has been left.
 
 `use:asDraggable` should never be combined with `use:asDroppable` (as the latter already includes the former) - if you want an element to be dropped somewhere, simply use `use:asDroppable` alone.
@@ -225,6 +224,7 @@ While being hovered by a droppable whose data offered is at least partially acce
 * [dragging an existing dummy](https://svelte.dev/repl/ee2a354b389049fa87da061ab7731c53) - drags a dummy built from an existing HTML element (which must be visible, however)
 * [dragging an ad-hoc dummy](https://svelte.dev/repl/65a48616a12f4cd18bca6fed83cb2088) - demonstrates how to dynamically create a drag image for a draggable
 * [plain dragging from a handle](https://svelte.dev/repl/83e4a79911f243f0b618fd25eece9d39) - illustrates dragging from a given handle rather than the whole draggable
+* [holding over a dropzone](https://svelte.dev/repl/b179ed1e9f584bd687f2588da2129f12) - detects when a dragged element stands still for a while (i.e., is "held") over a drop zone
 * [plain dragging with panning](https://svelte.dev/repl/70d99ffcd0494eac871e5ce68198bd4d) - demonstrates automatic scrolling while a Draggable is dragged over a scrollable container
 * [plain draggable Button](https://svelte.dev/repl/ba1d1ce67c0b40439ea5e3015d6d36bf) - drags a button which remains clickable
 * [plain draggable Note](https://svelte.dev/repl/03727e9474614e678b23fdaa1cbf5003) - drags a "note", but only from its title bar
@@ -245,8 +245,6 @@ While being hovered by a droppable whose data offered is at least partially acce
 * [type-specific drop with CSS class "hovered"](https://svelte.dev/repl/b354d5e23d7a4b09ad50af5114561e6a) - demonstrates visual feedback of drop zones while hovered by a matching droppable based on CSS class "hovered"
 * [operation-specific drop](https://svelte.dev/repl/263f54e6cbad489a861517bedb848e3b) - would illustrate the determination of droppability based on offered operations, if browsers would properly implement HTML5 drag-and-drop (i.e., may work in some browsers and "fail" in others)
 * [drag-and-drop into Trashcan](https://svelte.dev/repl/601fe6818bdc48f487002c489024c0a8) - drag any "Waste" into the Trashcan
-
-
 
 ## Caveats ##
 
