@@ -15,7 +15,7 @@ All examples are live and may be changed on the fly!
 * can restrict dragging to a given region (see [example](https://svelte.dev/repl/6e98523988f54335bf2e2307e79b4173))
 * supports automatic scrolling (aka "panning") of partially visible elements while s.th. is dragged over them (see [example](https://svelte.dev/repl/70d99ffcd0494eac871e5ce68198bd4d)), works fine even on Chrome for desktop (which already provides panning out of the box)
 * can mimic *real* dragging of an element (and not just a "ghost image" while the original stands still, see many examples, f.e. [this one](https://svelte.dev/repl/6e98523988f54335bf2e2307e79b4173))
-* can suppress the drag image at all (offering new possibilites - e.g., for lasso selection - using the same code base, see many of the examples, f.e. [this one](https://svelte.dev/repl/e9c64887e2684146acdc16e9af13193e))
+* can suppress the drag image at all (offering a bunch of new possibilites using the same code base, see many of the examples, f.e. [this one](https://svelte.dev/repl/e9c64887e2684146acdc16e9af13193e))
 * supports dragging elements from a given handle only (instead of the whole element itself, see [example](https://svelte.dev/repl/86663312b0034250943904ed537feff8))
 * offers visual feedback of dragged elements and drop zones by simple styling (using dynamically assigned CSS classes, see several examples, such as [this one](https://svelte.dev/repl/601fe6818bdc48f487002c489024c0a8))
 * provides lots of live(!) [examples](#examples) for many use cases
