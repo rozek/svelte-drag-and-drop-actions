@@ -20,7 +20,7 @@ All examples are live and may be changed on the fly!
 * offers visual feedback of dragged elements and drop zones by simple styling (using dynamically assigned CSS classes, see several examples, such as [this one](https://svelte.dev/repl/601fe6818bdc48f487002c489024c0a8))
 * recognizes when a draggable stands still (i.e., it's "held") over a drop zone for a given time (see [example](https://svelte.dev/repl/e1c6ee3a5b10464585d86cec61cccab4))
 * provides lots of live(!) [examples](#examples) for many use cases
-* but, unfortunately, it may also inherit bugs in the browser implementation of native HTML drag-and-drop (thinking of Safari 13.0/13.1, f.e.) if they can not be compensated by the author
+* however, unfortunately, it may also suffer from any bugs in the browser implementations of native HTML drag-and-drop (thinking of Safari 13.0/13.1, f.e.) if they can not be compensated by the author
 
 HTML5 Drag-and-Drop allows web applications to provide a visual user interface for transfering data between HTML elements or exchanging data with a browser's environment. Using HTML5 Drag-and-Drop for the *operation* of an application (i.e. the repositioning, resizing or reordering of elements) is difficult and suffers from some browser-specific bugs.
 
