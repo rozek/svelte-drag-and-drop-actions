@@ -2,7 +2,7 @@
 
 a lightweight but flexible HTML5 Drag-and-Drop implemented as Svelte actions
 
-**Features:**
+**some of its Features:**
 
 * HTML5 drag-and-drop features remain available (see [example](https://svelte.dev/repl/8e0ec7bf90bf4ad889b48ff6029bf1f6))
 * works on mobile devices (when combined with [svelte-drag-drop-touch](https://github.com/rozek/svelte-drag-drop-touch))
@@ -16,6 +16,7 @@ a lightweight but flexible HTML5 Drag-and-Drop implemented as Svelte actions
 * can suppress the drag image at all (offering new possibilites - e.g., for lasso selection - using the same code base, see many of the examples, f.e. [this one](https://svelte.dev/repl/e9c64887e2684146acdc16e9af13193e))
 * supports dragging elements from a given handle only (instead of the whole element itself, see [example](https://svelte.dev/repl/86663312b0034250943904ed537feff8))
 * visual feedback of dragged elements and drop zones by simple styling (using dynamically assigned CSS classes, see several examples, such as [this one](https://svelte.dev/repl/601fe6818bdc48f487002c489024c0a8))
+* provides lots of [examples](#examples) for many use cases
 
 HTML5 Drag-and-Drop allows web applications to provide a visual user interface for transfering data between HTML elements or exchanging data with a browser's environment. Using HTML5 Drag-and-Drop for the *operation* of an application (i.e. the repositioning, resizing or reordering of elements) is difficult and suffers from some browser-specific bugs.
 
