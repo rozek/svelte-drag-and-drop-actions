@@ -8,7 +8,7 @@ a lightweight but flexible HTML5 Drag-and-Drop implemented as Svelte actions
 * works on mobile devices (when combined with [svelte-drag-drop-touch](https://github.com/rozek/svelte-drag-drop-touch))
 * supports custom drag images ([from existing DOM elements](https://svelte.dev/repl/ee2a354b389049fa87da061ab7731c53) or [from HTML markup](https://svelte.dev/repl/801170099918424c998f689a3c6b2ddc))
 * drag images may even be dynamically created (see [example](https://svelte.dev/repl/65a48616a12f4cd18bca6fed83cb2088))
-* supports simple dragging (i.e., without dropping, see [example](https://svelte.dev/repl/e779dd6b998a4c0ba94e417dd2a66c16))
+* supports simple dragging (i.e., without dropping, see [example](https://svelte.dev/repl/e779dd6b998a4c0ba94e417dd2a66c16), don't worry if the example seems to lag - it's just because of the amount of console output)
 * provides mechanisms to reduce the code needed to implement element dragging (see [example](https://svelte.dev/repl/6e98523988f54335bf2e2307e79b4173))
 * can restrict dragging to a given region (see [example](https://svelte.dev/repl/6e98523988f54335bf2e2307e79b4173))
 * supports automatic scrolling (aka "panning") of partially visible elements while s.th. is dragged over them (see [example](https://svelte.dev/repl/70d99ffcd0494eac871e5ce68198bd4d)), works fine even on Chrome for desktop (which already provides panning out of the box)
