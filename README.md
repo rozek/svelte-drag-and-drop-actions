@@ -4,7 +4,7 @@ a lightweight but flexible HTML5 Drag-and-Drop implemented as Svelte actions
 
 **some of its Features:**
 
-All examples are live and may be changed on the fly!
+All [examples](#examples) are live and may be changed on the fly!
 
 * HTML5 drag-and-drop features remain available (see [example](https://svelte.dev/repl/8e0ec7bf90bf4ad889b48ff6029bf1f6))
 * works on mobile devices (when combined with [svelte-drag-drop-touch](https://github.com/rozek/svelte-drag-drop-touch))
