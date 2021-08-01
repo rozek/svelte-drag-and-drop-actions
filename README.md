@@ -4,7 +4,7 @@ a lightweight but flexible HTML5 Drag-and-Drop implemented as Svelte actions
 
 **some of its Features:**
 
-All [examples](#examples) are live and may be changed on the fly!
+All examples are live and may be changed on the fly!
 
 * HTML5 drag-and-drop features remain available (see [example](https://svelte.dev/repl/8e0ec7bf90bf4ad889b48ff6029bf1f6))
 * works on mobile devices (when combined with [svelte-drag-drop-touch](https://github.com/rozek/svelte-drag-drop-touch))
@@ -33,8 +33,6 @@ A first Svelte component based on `svelte-drag-and-drop-actions` is the [svelte-
 **NPM users**: please consider the [Github README](https://github.com/rozek/svelte-drag-and-drop-actions/blob/main/README.md) for the latest description of this package (as updating the docs would otherwise always require a new NPM package version)
 
 **Mobile Developers**: since many mobile platforms lack support for native HTML5 drag-and-drop, you should consider importing [svelte-drag-drop-touch](https://github.com/rozek/svelte-drag-drop-touch) as a polyfill (a simple import of that package will suffice - there is no extra programming needed)
-
-*Please note: this package is currently under active development. Be invited to follow me on this road (with many detours searching for a [proper build environment](https://github.com/rozek/build-configuration-study), preparing [npm packages for Svelte](https://github.com/rozek/save-to-file) or struggling with singletons that turn out not to be so "single" in reality), but don't expect this package to be stable until perhaps end of July 2021 (sorry for frequent updates until then - sometimes you may see even multiple npm publications per day...).*
 
 ## Installation ##
 
@@ -246,6 +244,7 @@ While being hovered by a droppable whose data offered is at least partially acce
 * [type-specific drop with CSS class "hovered"](https://svelte.dev/repl/b354d5e23d7a4b09ad50af5114561e6a) - demonstrates visual feedback of drop zones while hovered by a matching droppable based on CSS class "hovered"
 * [operation-specific drop](https://svelte.dev/repl/263f54e6cbad489a861517bedb848e3b) - would illustrate the determination of droppability based on offered operations, if browsers would properly implement HTML5 drag-and-drop (i.e., may work in some browsers and "fail" in others)
 * [drag-and-drop into Trashcan](https://svelte.dev/repl/601fe6818bdc48f487002c489024c0a8) - drag any "Waste" into the Trashcan
+
 
 ## Caveats ##
 
