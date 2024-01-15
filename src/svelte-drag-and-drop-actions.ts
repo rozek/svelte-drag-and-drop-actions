@@ -1262,8 +1262,6 @@
       currentDropZoneOptions.PanSpeed        = Options.PanSpeed
     }
 
-    Element.setAttribute('draggable','true')
-
 // @ts-ignore we know that the passed event is a DragEvent
     Element.addEventListener('dragenter', enteredByDroppable)
 // @ts-ignore we know that the passed event is a DragEvent
