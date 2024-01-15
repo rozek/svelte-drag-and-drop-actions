@@ -34,6 +34,8 @@ A first Svelte component based on `svelte-drag-and-drop-actions` is the [svelte-
 
 **Mobile Developers**: since many mobile platforms lack support for native HTML5 drag-and-drop, you should consider importing [svelte-drag-drop-touch](https://github.com/rozek/svelte-drag-drop-touch) as a polyfill (a simple import of that package will suffice - there is no extra programming needed)
 
+**Firefox Users**: because of an old but still unfixed [bug in Mozilla Firefox](https://stackoverflow.com/questions/13110349/pagex-and-pagey-are-always-set-to-0-in-firefox-during-the-ondrag-event), svelte-drag-and-drop-actions do not work properly in Firefox browsers. Right now, I have no idea how to work around that bug without affecting other browsers and in a way that survives the moment when Mozilla finally fixes that bug...
+
 > Just a small note: if you like this module and plan to use it, consider "starring" this repository (you will find the "Star" button on the top right of this page), so that I know which of my repositories to take most care of.
 
 ## Installation ##
