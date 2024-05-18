@@ -3,14 +3,15 @@
   "version": "1.0.1",
   "description": "HTML5 Drag-and-Drop implemented as Svelte actions",
   "type": "module",
-  "browser": "./dist/svelte-drag-and-drop-actions.js",
+  "main": "./dist/svelte-drag-and-drop-actions.js",
   "module": "./dist/svelte-drag-and-drop-actions.esm.js",
   "svelte": "./dist/svelte-drag-and-drop-actions.esm.js",
   "types": "./dist/svelte-drag-and-drop-actions.d.ts",
   "exports": {
     ".": {
       "require": "./dist/svelte-drag-and-drop-actions.js",
-      "import": "./dist/svelte-drag-and-drop-actions.esm.js"
+      "import": "./dist/svelte-drag-and-drop-actions.esm.js",
+      "svelte": "./dist/svelte-drag-and-drop-actions.esm.js"
     },
     "./package.json": "./package.json"
   },
@@ -45,6 +46,7 @@
     "typescript": "^4.3.4"
   },
   "dependencies": {
+  	"tslib": "^2.6.2",
     "javascript-interface-library": "^0.1.5",
     "svelte-coordinate-conversion": "^0.1.6",
     "svelte-drag-and-drop-actions": "^0.1.28"
