@@ -1,4 +1,4 @@
-import { global, allowedPlainObject, throwError, ValueIsNonEmptyString, allowedNonEmptyString, ValueIsFunction, allowedFiniteNumber, allowedOrdinal, ValueIsPlainObject, ValueIsFiniteNumber, allowedFunction, constrained, ValueIsString, ObjectIsNotEmpty, allowPlainObject, quoted, allowedIntegerInRange, ValueIsNumber, ValueIsOneOf, allowedString, allowListSatisfying } from 'javascript-interface-library';
+import { global, allowedPlainObject, throwError, ValueIsNonEmptyString, allowedNonEmptyString, ValueIsFunction, allowedFiniteNumber, allowedOrdinal, allowedFunction, ValueIsPlainObject, constrained, ValueIsString, ObjectIsNotEmpty, allowPlainObject, quoted, allowedIntegerInRange, ValueIsNumber, ValueIsOneOf, ValueIsFiniteNumber, allowedString, allowListSatisfying } from 'javascript-interface-library';
 import Conversion from 'svelte-coordinate-conversion';
 
 //----------------------------------------------------------------------------//
